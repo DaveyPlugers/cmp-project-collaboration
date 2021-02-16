@@ -36,15 +36,15 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-h = 0.005   #Timestep
-L = 60 #Box size
+h = 0.001   #Timestep
+L = 100 #Box size
 m=3     #Mass of particle
 eps = 119
 sigma = 3.405
-Particleamount = 10
-Particlevelocity = 3
+Particleamount = 20
+Particlevelocity = 0.5
 dimension = 2
-Timesteps = 200   #Total amount of steps we will take
+Timesteps = 5000   #Total amount of steps we will take
 #Particles = np.array([[[20,50],[2,-2.8]],[[30,50],[-1,-3]]]).astype('float64') #This array will store the positions and velocities at this time, make random later
                                                                 #[Timestep0,Timestep1,Timestep2,...] Will be appended like that where
                                                                 #Timestep0 = [Particle1,Particle2] where Particle1 = [pos1vector,vel1vector]
@@ -54,9 +54,9 @@ for l in range(Particleamount):
     Partic = [[L*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
     Particles.append(Partic)
 
-print(Particles)
+
 Particles = np.array(Particles).astype('float64')
-print(Particles)
+
 Allpositions = []    #Make array where we will save all the positions (and velocity) for all the timesteps
 Allpositions.append(Particles.copy())   #Easier if this isn't a numpy array
 
@@ -83,8 +83,34 @@ def Force(j):           #This calculates the force vector, will need improvement
 
     return force
 
+Epot = []
+Ekin = []
+Etot = []
+
+
+def Energy():
+    pot=0
+    kin=0
+    for j in range(Particleamount):
+        pot1 = 0
+        kin += 0.5*m*(sum([x*x for x in Particles[j,1]])) #Add kinetic energy of part. j
+        for k in range(Particleamount): #Potential energy
+            if k !=j:
+                r = Distancepoints(Particles[j,0],Particles[k,0])
+                pot1 += 4*eps*((sigma/r)**12 - (sigma/r)**6)        #Add pot. energy of part. j wrt. k
+        pot += pot1
+    Epot.append(pot)
+    Ekin.append(kin)
+    Etot.append(pot+kin)
+
+
+
+
+
 def minimage(j): #Takes index, checks if corresp. particle outside box and moves it
     Particles[j,0] = Particles[j, 0] % L
+
+
 
 
 for tstep in range(Timesteps):      #Here we let the magic happen, we loop and let the system evolve
@@ -94,6 +120,8 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
         Particles[j,0] = Particles[j,0] + Particles[j,1]*h
         Particles[j,1] = Particles[j,1] + h/m*Force(j)
         minimage(j) #Dunno why I made this a function, it's a one line code don't think we need it anywhere else?
+    if tstep%10==0: #For now I do every 10 steps
+        Energy()
 
 
 
@@ -102,10 +130,15 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
     print("timestep= " + str(tstep))            #Not needed but it's here anyways
 
 
-print(Allpositions) #Used for checking mistakes in simulation, remove later
+#print(Allpositions) #Used for checking mistakes in simulation, remove later
 
 
-
+plot2 = plt.figure(2)
+plt.plot(range(0,Timesteps,10),Epot)
+plt.plot(range(0,Timesteps,10),Ekin)
+plt.plot(range(0,Timesteps,10),Etot)
+plt.legend(["Epot","Ekin","Etot"])
+plt.show
 
 
 #Attempt at making animation
@@ -121,15 +154,13 @@ def init():
     ax.set_xlim(0, L)
     ax.set_ylim(0, L)
 
-print(Allpositions[0])
-print(3)
-print(Allpositions[0][0])
-print(4)
-print(Allpositions[0][:,0])
+
+#The 100 I divided and multiplied with is something I will have to manually change, it's so our animation isn't slow when we have many steps
 
 
 def update(q):
-    ln1.set_data([Allpositions[int(q)][:,0,0]], [Allpositions[int(q)][:,0,1]])   #i is the timestep, 0 is particle 1, 0 is for position not velocity, 0 is for x not y, second one we have 1 in the last for y not x
+    ln1.set_data([Allpositions[int(100*q)][:,0,0]], [Allpositions[int(100*q)][:,0,1]])   #i is the timestep, 0 is particle 1, 0 is for position not velocity, 0 is for x not y, second one we have 1 in the last for y not x
 
-ani = FuncAnimation(fig, update,frames=Timesteps+1,interval=10, init_func=init)
+ani = FuncAnimation(fig, update,frames=int((Timesteps)/100+1),interval=10, init_func=init)
 plt.show()
+
