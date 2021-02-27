@@ -1,9 +1,17 @@
+
+#Framework of Allposition array: Allposition[i][j][k] =>
+#i gives timestep [Timestep0,Timestep1,Timestep2,...] Will be appended like that where =>
+#j gives particle number Timestep0 = [Particle1,Particle2] where =>
+#k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,veljvector]
+
+
+
+
 import numpy as np
 import random
-import math
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from mpl_toolkits.mplot3d import Axes3D
+
 
 
 
@@ -28,55 +36,57 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-h = 0.01   #Timestep
-L = 1000 #Box size
-m=3     #Mass of particle
+Tsteplength = 0.002
+BoxSize = 15
+mass=6
 eps = 119
 sigma = 3.405
-Particleamount = 50
-Particlevelocity = 0.01
+Particleamount = 8
+Particlevelocity = 1
 dimension = 2
-Timesteps = 1000   #Total amount of steps we will take
-#Particles = np.array([[[30,95],[0,0]],[[30,5],[0,0]]]).astype('float64') #This array will store the positions and velocities at this time, make random later
-                                                                #[Timestep0,Timestep1,Timestep2,...] Will be appended like that where
-                                                                #Timestep0 = [Particle1,Particle2] where Particle1 = [pos1vector,vel1vector]
+Timesteps = 1000
+
+#Generating particles and Allpositions array
 Particles = []
 for l in range(Particleamount):
 
-    Partic = [[L*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
+    Partic = [[BoxSize*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
     Particles.append(Partic)
 
 
 Particles = np.array(Particles).astype('float64')
 
-Allpositions = [[] for x in range(Timesteps+1)]  #Make array where we will save all the positions (and velocity) for all the timesteps
-Allpositions[0] = Particles.copy()   #Easier if this isn't a numpy array
+Allpositions = [[] for x in range(Timesteps+1)]  #Premaking is faster than appending in Matlab not sure about Python
+Allpositions[0] = Particles.copy()
 
 
-def Distancepoints(Vector1,Vector2):  #Calculate distance between 2 positions
-    Distance = math.sqrt(sum([x * x for x in ((Vector1 - Vector2 + L/2)%L - L/2)]))
+def Distancepoints(Vector1,Vector2):
+    #Takes 2 position vectors and calculates distance between them
+    Distance = sum([x * x for x in ((Vector1 - Vector2 + BoxSize/2)%BoxSize - BoxSize/2)])**0.5
     return Distance
 
 
 
-def LJpot(Vector1,Vector2):   #Can be updated to also include the distance already and then an if to see if distance was given
+def LJForce(Vector1,Vector2):
+    #Takes 2 position vectors and returns the force on Vector1 due to Vector2
     r = Distancepoints(Vector1,Vector2)
-    Constant = 24*eps*sigma**6*(2*sigma**6/r**14 - 1/r**8)  #Neglect - since we have -deltaU for our force
-    Force = [Constant*x for x in ((Vector1 - Vector2 + L/2)%L - L/2)] #Maybe switch 2 and 1
-
+    Constant = 24*(2/r**14 - 1/r**8)  #Neglect - since it's in the force, extra 1/r for normalisation Vector1 - Vector2 in next line
+    Force = [Constant*x for x in ((Vector1 - Vector2 + BoxSize/2)%BoxSize - BoxSize/2)] #Maybe switch 2 and 1
     return Force
 
 
-def Force(j,tstep):           #This calculates the force vector, will need improvement later for other mirrored particles
+def Force(j,tstep):
+    #This calculates the total force vector experienced by particle j
+    #Can be improved to exploit symmetry of the force (LJForce(j,i) = LJForce(i,j))
     force = np.array([0 for l in range(dimension)], dtype=np.float64)
-    if tstep ==-1: #We don't save position tstep+1 until we have done the velocities as well, this is a workaround
-        for i in range(Particleamount): #Loop over all the different particles
+    if tstep ==-1: #We don't save position tstep+1 until we have done the velocities as well, this is a workaround to get the updated force
+        for i in range(Particleamount):
             if i !=j:
-                force += LJpot(Particles[j,0], Particles[i,0])
+                force += LJForce(Particles[j,0], Particles[i,0])
     else:
-        for i in range(Particleamount): #Loop over all the different particles
+        for i in range(Particleamount):
             if i !=j:
-                force += LJpot(Allpositions[tstep][j][0], Allpositions[tstep][i][0])    #We use the Allpositions instead of Particles since these contain already updated values
+                force += LJForce(Allpositions[tstep][j,0], Allpositions[tstep][i][0])    #We use the Allpositions instead of Particles since these contain already updated values
 
     return force
 
@@ -86,16 +96,17 @@ Etot = []
 
 
 def Energy():
+    #Can be called to save the potential,kinetic and total energy of the system
     pot=0
     kin=0
     for j in range(Particleamount):
         pot1 = 0
-        kin += 0.5*m*(sum([x*x for x in Particles[j,1]])) #Add kinetic energy of part. j
-        for k in range(Particleamount): #Potential energy
+        kin += (0.5*mass)*(sum([x*x for x in Particles[j,1]]))
+        for k in range(Particleamount):
             if k !=j:
                 r = Distancepoints(Particles[j,0],Particles[k,0])
-                pot1 += 4*eps*((sigma/r)**12 - (sigma/r)**6)        #Add pot. energy of part. j wrt. k
-        pot += pot1/2
+                pot1 += 4*((1/r)**12 - (1/r)**6)
+        pot += pot1/2  # *0.5 to prevent double counting
     Epot.append(pot)
     Ekin.append(kin)
     Etot.append(pot+kin)
@@ -104,8 +115,6 @@ def Energy():
 
 
 
-def minimage(j): #Takes index, checks if corresp. particle outside box and moves it
-    Particles[j,0] = Particles[j, 0] % L
 
 
 
@@ -114,10 +123,10 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
 
     for j in range(Particleamount): #We make sure to update all the particle positions
 
-        Particles[j,0] = Particles[j,0] + Particles[j,1]*h +h**2/(2*m)*Force(j,tstep)
-        minimage(j) #Dunno why I made this a function, it's a one line code don't think we need it anywhere else?
+        Particles[j,0] = Particles[j,0] + Particles[j,1]*Tsteplength +Tsteplength**2/(2*mass)*Force(j,tstep)
+        Particles[j,0] = Particles[j, 0] % BoxSize
     for j in range(Particleamount): #Here we update the particle velocities
-        Particles[j,1] = Particles[j,1] + h/(2*m)*(Force(j,-1) + Force(j,tstep))
+        Particles[j,1] = Particles[j,1] + Tsteplength/(2*mass)*(Force(j,-1) + Force(j,tstep))
 
     if tstep%10==0: #For now I do every 10 steps
         Energy()
@@ -137,7 +146,7 @@ plt.plot(range(0,Timesteps,10),Epot)
 plt.plot(range(0,Timesteps,10),Ekin)
 plt.plot(range(0,Timesteps,10),Etot)
 plt.legend(["Epot","Ekin","Etot"])
-plt.show
+
 
 
 #Attempt at making animation
@@ -150,16 +159,16 @@ ln1, = plt.plot([], [], 'ro')
 
 
 def init():
-    ax.set_xlim(0, L)
-    ax.set_ylim(0, L)
+    ax.set_xlim(0, BoxSize)
+    ax.set_ylim(0, BoxSize)
 
 
 #The 100 I divided and multiplied with is something I will have to manually change, it's so our animation isn't slow when we have many steps
 
 
 def update(q):
-    ln1.set_data([Allpositions[int(100*q)][:,0,0]], [Allpositions[int(100*q)][:,0,1]])   #i is the timestep, 0 is particle 1, 0 is for position not velocity, 0 is for x not y, second one we have 1 in the last for y not x
+    ln1.set_data([Allpositions[int(10*q)][:,0,0]], [Allpositions[int(10*q)][:,0,1]])   #i is the timestep, 0 is particle 1, 0 is for position not velocity, 0 is for x not y, second one we have 1 in the last for y not x
 
-ani = FuncAnimation(fig, update,frames=int((Timesteps)/100+1),interval=10, init_func=init)
+ani = FuncAnimation(fig, update,frames=int((Timesteps)/10+1),interval=10, init_func=init)
 plt.show()
 
