@@ -34,41 +34,69 @@ from matplotlib.animation import FuncAnimation
 #9 We need to add the potential and kinetic energy plot
 #Done
 
-
+Temperature = 70  #Make this an input variable later
+Density= 0.02 #In units, atomic mass/sigma**3, make input variable later
+mass=39.948 #Mass in atomic mass units
 
 Tsteplength = 0.002
-BoxSize = 15
-mass=6
+BoxSize = (3*mass/Density)**(1/3)  #Times 3 since 3 particles per cube
+print(BoxSize)
 eps = 119
 sigma = 3.405
-Particleamount = 8
-Particlevelocity = 1
-dimension = 2
-Timesteps = 1000
 
+Particlevelocity = 0.5
+
+Timesteps = 200
+Random = True
 #Generating particles and Allpositions array
 Particles = []
-for l in range(Particleamount):
+if False:
+    Particleamount = 8
+    dimension = 2
+    for l in range(Particleamount):
 
-    Partic = [[BoxSize*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
-    Particles.append(Partic)
+        Partic = [[BoxSize*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
+        Particles.append(Partic)
 
 
+
+else:
+    dimension=3
+    Particleamount = 108
+    Number = 0
+    var = (Temperature / 100) ** (1 / 2)  # 100 comes from eps/k_b = 100K
+    Velocities = np.random.normal(0, var, 324)
+    for i in range(6):
+        for j in range(6):
+            for k in range(3):
+                Partic = [[k * BoxSize / 3 + (j + i) % 2 * BoxSize / 6, j * BoxSize / 6, i * BoxSize / 6],
+                          [Velocities[3 * Number], Velocities[3 * Number + 1], Velocities[3 * Number + 2]]]
+                Number += 1
+                Particles.append(Partic)
 Particles = np.array(Particles).astype('float64')
-
 Allpositions = [[] for x in range(Timesteps+1)]  #Premaking is faster than appending in Matlab not sure about Python
 Allpositions[0] = Particles.copy()
 
 
 def Distancepoints(Vector1,Vector2):
-    #Takes 2 position vectors and calculates distance between them
+    '''
+    Takes 2 position vectors and calculates distance between them
+    :param Vector1: position vector for particle one
+    :param Vector2: position vector for particle two
+    :return: distance between two particles
+    '''
     Distance = sum([x * x for x in ((Vector1 - Vector2 + BoxSize/2)%BoxSize - BoxSize/2)])**0.5
     return Distance
 
 
 
 def LJForce(Vector1,Vector2):
-    #Takes 2 position vectors and returns the force on Vector1 due to Vector2
+    '''
+    Takes 2 position vectors and returns the Lennard-Jones force on Vector1 due to Vector2
+    :param Vector1: position vector for particle one
+    :param Vector2: position vector for particle two
+    :return: Lennard-Jones force between two particles
+    '''
     r = Distancepoints(Vector1,Vector2)
     Constant = 24*(2/r**14 - 1/r**8)  #Neglect - since it's in the force, extra 1/r for normalisation Vector1 - Vector2 in next line
     Force = [Constant*x for x in ((Vector1 - Vector2 + BoxSize/2)%BoxSize - BoxSize/2)] #Maybe switch 2 and 1
@@ -76,7 +104,12 @@ def LJForce(Vector1,Vector2):
 
 
 def Force(j,tstep):
-    #This calculates the total force vector experienced by particle j
+    '''
+    This calculates the total force vector experienced by particle j
+    :param j: index of a particle
+    :param tstep: time step
+    :return:total force
+    '''
     #Can be improved to exploit symmetry of the force (LJForce(j,i) = LJForce(i,j))
     force = np.array([0 for l in range(dimension)], dtype=np.float64)
     if tstep ==-1: #We don't save position tstep+1 until we have done the velocities as well, this is a workaround to get the updated force
@@ -96,7 +129,9 @@ Etot = []
 
 
 def Energy():
-    #Can be called to save the potential,kinetic and total energy of the system
+    '''
+    Can be called to save the potential,kinetic and total energy of the system
+    '''
     pot=0
     kin=0
     for j in range(Particleamount):
@@ -138,7 +173,7 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
     print("timestep= " + str(tstep))            #Not needed but it's here anyways
 
 
-#print(Allpositions) #Used for checking mistakes in simulation, remove later
+print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 
 plot2 = plt.figure(2)
