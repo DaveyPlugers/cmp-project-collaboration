@@ -1,10 +1,7 @@
-
 #Framework of Allposition array: Allposition[i][j][k] =>
 #i gives timestep [Timestep0,Timestep1,Timestep2,...] Will be appended like that where =>
 #j gives particle number Timestep0 = [Particle1,Particle2] where =>
 #k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,veljvector]
-
-
 
 
 import numpy as np
@@ -13,46 +10,27 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
+Temperature = 100  #Make this an input variable later
+Density= 0.8 #In units, atoms/sigma**3, make input variable later
+mass=1 #Mass in atomic mass units
 
 
 
-#Current list of problems and improvements to make:
-#4: We still have to tinker with h, Timesteps and delay of animation to get it working properly
-#5: (minor)  We have h which gives us how long our timestep is and a constant named Timesteps, these 2 might be a bit confusing if we use them through eachother
-#6 Still did not derive dimensionless expressions or update the code to it yet
-
-#8 Our 3d animation is not running yet (only got the scatter to plot once), found some examples online but got distracted with other problems
-
-#10 (minor and negigeble) Code can crash sometimes, this is due to instability causing a zero division in distance
-#11 rewrite position and velocity update to leap-frog (But this will probably be next week's milestone)
-
-
-
-#Done tasks
-#7: We do not have anything set up to have interaction with mirror particles (at x-L for example) but this is for later
-#Done
-#9 We need to add the potential and kinetic energy plot
-#Done
-
-Temperature = 70  #Make this an input variable later
-Density= 0.02 #In units, atomic mass/sigma**3, make input variable later
-mass=39.948 #Mass in atomic mass units
-
-Tsteplength = 0.002
-BoxSize = (3*mass/Density)**(1/3)  #Times 3 since 3 particles per cube
+Tsteplength = 0.001
+BoxSize = 3*(4*mass/Density)**(1/3)  #Times 3 since 3 particles per cube
 print(BoxSize)
-eps = 119
-sigma = 3.405
 
-Particlevelocity = 0.5
 
-Timesteps = 200
-Random = True
+Particlevelocity = 0.001
+
+Timesteps = 600
+Random = False
 #Generating particles and Allpositions array
 Particles = []
-if False:
+if Random:
     Particleamount = 8
     dimension = 2
+
     for l in range(Particleamount):
 
         Partic = [[BoxSize*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
@@ -147,6 +125,20 @@ def Energy():
     Etot.append(pot+kin)
 
 
+def Rescale():
+    '''
+    Can be called to rescale the kinetic energy of the system
+    :return: Scale factor for the velocities
+    '''
+    VelSquaredSummed = 0
+    for j in range(Particleamount):
+        VelSquaredSummed += sum([x*x for x in Particles[j,1]])
+    Lambda = (((Particleamount-1)*3*Temperature)/(VelSquaredSummed*100))**(1/2)
+    return Lambda
+
+
+
+
 
 
 
@@ -159,12 +151,20 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
     for j in range(Particleamount): #We make sure to update all the particle positions
 
         Particles[j,0] = Particles[j,0] + Particles[j,1]*Tsteplength +Tsteplength**2/(2*mass)*Force(j,tstep)
-        Particles[j,0] = Particles[j, 0] % BoxSize
+        Particles[j,0] = Particles[j,0] %BoxSize
+
     for j in range(Particleamount): #Here we update the particle velocities
         Particles[j,1] = Particles[j,1] + Tsteplength/(2*mass)*(Force(j,-1) + Force(j,tstep))
 
+
     if tstep%10==0: #For now I do every 10 steps
         Energy()
+    if tstep%50==0 or tstep in [10,20,35,80]:
+        ScaleFactor = Rescale()
+        print(ScaleFactor)
+        for k in range(Particleamount):
+            Particles[k,1] = ScaleFactor*Particles[k,1]
+
 
 
 
@@ -173,7 +173,7 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
     print("timestep= " + str(tstep))            #Not needed but it's here anyways
 
 
-print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
+#print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 
 plot2 = plt.figure(2)
