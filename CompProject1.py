@@ -17,11 +17,11 @@ mass=1 #Mass in atomic mass units
 
 
 Tsteplength = 0.001
-BoxSize = 3*(4*mass/Density)**(1/3)  #Times 3 since 3 particles per cube
-print(BoxSize)
+BoxSize = 3*(4*mass/Density)**(1/3)  #Times 4 since 4 particles per cube
+print("Boxsize = " + str(BoxSize))
 
 
-Particlevelocity = 0.001
+
 
 Timesteps = 600
 Random = False
@@ -30,7 +30,7 @@ Particles = []
 if Random:
     Particleamount = 8
     dimension = 2
-
+    Particlevelocity = 0.001
     for l in range(Particleamount):
 
         Partic = [[BoxSize*random.random() for d in range(dimension)],[2*Particlevelocity*(random.random()-0.5) for d in range(dimension)]]
@@ -136,7 +136,18 @@ def Rescale():
     Lambda = (((Particleamount-1)*3*Temperature)/(VelSquaredSummed*100))**(1/2)
     return Lambda
 
-
+def Histogram(Bins):
+    '''
+    Can be called to calculate a histogram giving number of particles in certain ranges
+    :param Bins: Amount of intervals of the histogram
+    :return: An array of Histogram values
+    '''
+    Histo = np.histogram([BoxSize], bins=[BoxSize / (2 * Bins) * x for x in range(Bins + 1)])[0]
+    for i in range(Particleamount):
+        Distances = [Distancepoints(Particles[1+i+j,0],Particles[i,0]) for j in range(Particleamount-i-1)]  #Skipping some Distance calculations here but compensating the counting by a factor 2 in the end
+        Histo += np.histogram(Distances, bins=[BoxSize/(2*Bins)*x for x in range(Bins+1)])[0]
+    Histo = 2*Histo
+    return Histo
 
 
 
@@ -161,16 +172,18 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
         Energy()
     if tstep%50==0 or tstep in [10,20,35,80]:
         ScaleFactor = Rescale()
-        print(ScaleFactor)
+        print("Scalefactor= " + str(ScaleFactor))
         for k in range(Particleamount):
             Particles[k,1] = ScaleFactor*Particles[k,1]
-
+    if tstep==0:
+        Histo = Histogram(20)
+        print(Histo)
 
 
 
     Allpositions[tstep + 1] = (Particles.copy())       #We save the updated values in our list
 
-    print("timestep= " + str(tstep))            #Not needed but it's here anyways
+    print("timestep = " + str(tstep))            #Not needed but it's here anyways
 
 
 #print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
