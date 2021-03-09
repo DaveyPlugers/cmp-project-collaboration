@@ -3,15 +3,15 @@
 #j gives particle number Timestep0 = [Particle1,Particle2] where =>
 #k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,veljvector]
 
-
+import math
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-Temperature = 100  #Make this an input variable later
-Density= 0.8 #In units, atoms/sigma**3, make input variable later
+Temperature = 50  #Make this an input variable later
+Density= 1.2 #In units, atoms/sigma**3, make input variable later
 mass=1 #Mass in atomic mass units
 
 
@@ -19,11 +19,12 @@ mass=1 #Mass in atomic mass units
 Tsteplength = 0.001
 BoxSize = 3*(4*mass/Density)**(1/3)  #Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
+Bins = 20
+Timesteps = 400
+HistStart = 100
+HistTimes = [HistStart + (1+x)*50 for x in range(int((Timesteps-HistStart)/50))]
+print(HistTimes)
 
-
-
-
-Timesteps = 600
 Random = False
 #Generating particles and Allpositions array
 Particles = []
@@ -73,7 +74,7 @@ def LJForce(Vector1,Vector2):
     Takes 2 position vectors and returns the Lennard-Jones force on Vector1 due to Vector2
     :param Vector1: position vector for particle one
     :param Vector2: position vector for particle two
-    :return: Lennard-Jones force between two particles
+    :return: Lennard-Jones force vector between two particles
     '''
     r = Distancepoints(Vector1,Vector2)
     Constant = 24*(2/r**14 - 1/r**8)  #Neglect - since it's in the force, extra 1/r for normalisation Vector1 - Vector2 in next line
@@ -146,11 +147,20 @@ def Histogram(Bins):
     for i in range(Particleamount):
         Distances = [Distancepoints(Particles[1+i+j,0],Particles[i,0]) for j in range(Particleamount-i-1)]  #Skipping some Distance calculations here but compensating the counting by a factor 2 in the end
         Histo += np.histogram(Distances, bins=[BoxSize/(2*Bins)*x for x in range(Bins+1)])[0]
-    Histo = 2*Histo
+    #Histo = 2*Histo
     return Histo
 
 
-
+def Pressure():
+    DistTimesForce = []
+    for i in range(Particleamount):
+        for j in range(Particleamount-i-1):
+            r = Distancepoints(Particles[1+i+j,0],Particles[i,0])
+            DistTimesForce.append(12*(-2/r**12 + 1/r**6))
+    Pressure = 1 - (np.average(np.array(DistTimesForce))/(3*Particleamount*Temperature/100))
+    print(np.average(np.array(DistTimesForce)))
+    print(r)
+    return Pressure
 
 
 
@@ -175,15 +185,31 @@ for tstep in range(Timesteps):      #Here we let the magic happen, we loop and l
         print("Scalefactor= " + str(ScaleFactor))
         for k in range(Particleamount):
             Particles[k,1] = ScaleFactor*Particles[k,1]
-    if tstep==0:
-        Histo = Histogram(20)
+    if tstep ==HistStart:
+        Histo = Histogram(Bins)
+
+    elif tstep in HistTimes:
+        Histo += Histogram(Bins)
         print(Histo)
+    if tstep in [20, 80, 200, 250, 300,350]:
+        print("Pressure = " + str(Pressure()))
+
 
 
 
     Allpositions[tstep + 1] = (Particles.copy())       #We save the updated values in our list
 
     print("timestep = " + str(tstep))            #Not needed but it's here anyways
+
+Histo = Histo*(1/(len(HistTimes)))
+print(Histo)
+BinSize = BoxSize/(2*Bins)
+PairCorrelationDifferent = [(2*BoxSize**3*Histo[i])/(Particleamount*(Particleamount-1)*4*math.pi*((i+1)*BinSize)**2*BinSize) for i in range(len(Histo))]
+print("(r+Binsize)^2 instead " + str(PairCorrelationDifferent))
+
+PairCorrelation = [(2*BoxSize**3*Histo[i+1])/(Particleamount*(Particleamount-1)*4*math.pi*((i+1)*BinSize)**2*BinSize) for i in range(len(Histo)-1)]
+print("Skipped first one" + str(PairCorrelation))
+
 
 
 #print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
