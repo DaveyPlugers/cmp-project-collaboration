@@ -13,10 +13,30 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--Density',
+                    help='Value of box density, default: 1',
+                    nargs=1)
+parser.add_argument('--Temperature',
+                    help='Value of system temperature, default: 1',
+                    nargs=1)
+args = parser.parse_args()
+
+if args.Density is None:
+    Density = 1.
+else:
+    Density = float(args.Density[0])
+
+if args.Temperature is None:
+    Temperature = 1.
+else:
+    Temperature = float(args.Temperature[0])
 
 
-Temperature = 0.5  #Make this an input variable later
-Density= 1.2 #In units, atoms/sigma**3, make input variable later
+#Temperature = 0.5  #Make this an input variable later
+#Density= 1.2 #In units, atoms/sigma**3, make input variable later
 Mass=1 #Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  #Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
@@ -217,20 +237,20 @@ print("Skipped first one" + str(PairCorrelation))
 #print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 if CreatePlots:
-    plot2 = plt.figure(2)
-    plt.plot(range(0, TimeSteps, 10), Epot)
-    plt.plot(range(0, TimeSteps, 10), Ekin)
-    plt.plot(range(0, TimeSteps, 10), Etot)
-    plt.legend(["Epot","Ekin","Etot"])
+    plot2 = figure(2)
+    plot(range(0, TimeSteps, 10), Epot)
+    plot(range(0, TimeSteps, 10), Ekin)
+    plot(range(0, TimeSteps, 10), Etot)
+    legend(["Epot", "Ekin", "Etot"])
 
 
-    fig, ax = plt.subplots()
-    ln1, = plt.plot([], [], 'ro')
+    fig, ax = subplots()
+    ln1, = plot([], [], 'ro')
     def init():
         ax.set_xlim(0, BoxSize)
         ax.set_ylim(0, BoxSize)
     def update(q):
         ln1.set_data([AllPositions[int(10 * q)][:, 0, 0]], [AllPositions[int(10 * q)][:, 0, 1]])
     ani = FuncAnimation(fig, update, frames=int((TimeSteps) / 10 + 1), interval=10, init_func=init)
-    plt.show()
+    show()
 
