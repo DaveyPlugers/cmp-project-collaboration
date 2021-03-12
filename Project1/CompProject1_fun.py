@@ -7,6 +7,7 @@ k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,vel
 
 import math
 from typing import Any, Union
+from tqdm import tqdm
 
 import numpy as np
 import random
@@ -156,9 +157,10 @@ def PairCorrelation():
     return PairCorrel
 
 
-
-for tstep in range(TimeSteps):
-    print("timestep = " + str(tstep))
+bar = tqdm(range(TimeSteps))
+for tstep in bar:
+    bar.set_description(f"running simulation")
+    #time.sleep(0.2)#print("timestep = " + str(tstep))
     for j in range(ParticleAmount):
         Particles[j, 0] = Particles[j, 0] + Particles[j, 1] * TimeStepLength + TimeStepLength ** 2 / (
                 2 * Mass) * TotalForce(j, tstep, Dimension, ParticleAmount, AllPositions, BoxSize, Particles)
