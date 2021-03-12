@@ -10,6 +10,7 @@
 
 import math
 import numpy as np
+from tqdm import tqdm
 import random
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -195,9 +196,10 @@ def PairCorrelation():
     print("This is PairCorrel" + str(PairCorrel))
     return PairCorrel
 
-
-for tstep in range(TimeSteps):
-    print("timestep = " + str(tstep))
+bar = tqdm(range(TimeSteps))
+for tstep in bar:
+	bar.set_description(f"running simulation")
+    #print("timestep = " + str(tstep))
     for j in range(ParticleAmount):
         Particles[j,0] = Particles[j,0] + Particles[j,1] * TimeStepLength + TimeStepLength ** 2 / (2 * Mass) * TotalForce(j, tstep)
         Particles[j,0] = Particles[j,0] %BoxSize
