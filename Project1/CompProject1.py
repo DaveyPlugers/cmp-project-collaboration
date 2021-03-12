@@ -40,7 +40,7 @@ else:
 Mass=1 #Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  #Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
-TimeSteps = 1000
+TimeSteps = 5000
 TimeStepLength = 0.001
 
 HistBins = 20
@@ -198,7 +198,7 @@ def PairCorrelation():
 
 bar = tqdm(range(TimeSteps))
 for tstep in bar:
-	bar.set_description(f"running simulation")
+    bar.set_description(f"running simulation")
     #print("timestep = " + str(tstep))
     for j in range(ParticleAmount):
         Particles[j,0] = Particles[j,0] + Particles[j,1] * TimeStepLength + TimeStepLength ** 2 / (2 * Mass) * TotalForce(j, tstep)
