@@ -125,25 +125,36 @@ def Histogram(Bins):
     """
     Histo = np.histogram([BoxSize], bins=[BoxSize / (2 * Bins) * x for x in range(Bins + 1)])[0]
     for i in range(ParticleAmount):
-        Distances = [DistancePoints(Particles[1 + i + j, 0], Particles[i, 0]) for j in range(ParticleAmount - i - 1)]
+        Distances = [DistancePoints(Particles[1 + i + j, 0], Particles[i, 0],BoxSize) for j in range(ParticleAmount - i - 1)]
         Histo += np.histogram(Distances, bins=[BoxSize / (2 * Bins) * x for x in range(Bins + 1)])[0]
     # Histo = 2*Histo
     return Histo
 
 
-def Pressure():
-    """
-    Can be called to save the pressure of the system at the current timestep
-    """
-    DistTimesForce = []
+DistTimesForce = []
+def SumDistTimesForce():
+    '''
+    Can be called to save the sum of the Distance times the Force of all particle pairs, this will later be averaged to calculate the pressure
+    '''
+    DistTimesForce = 0
     for i in range(ParticleAmount):
         for j in range(ParticleAmount - i - 1):
-            Dist = DistancePoints(Particles[1 + i + j, 0], Particles[i, 0], BoxSize)
-            DistTimesForce.append(12 * (-2 / Dist ** 12 + 1 / Dist ** 6))
-    Pressure = 1 - (np.average(np.array(DistTimesForce)) / (3 * ParticleAmount * Temperature))
-    print(np.average(np.array(DistTimesForce)))
-    print(Dist)
+            Dist = DistancePoints(Particles[1+i+j,0],Particles[i,0],BoxSize)
+            DistTimesForce += (12*(-2/Dist**12 + 1/Dist**6))
+    return DistTimesForce
+
+def Pressure():
+    print(DistTimesForce)
+    Pressure = Temperature*Density - (Density*np.average(np.array(DistTimesForce)))/(3*ParticleAmount)
     return Pressure
+
+def PairCorrelation():
+    PairCorrel = [(2 * BoxSize ** 3 * Histo[i+1]) / (
+                ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
+     range(len(Histo)-1)]
+    print("This is PairCorrel" + str(PairCorrel))
+    return PairCorrel
+
 
 
 for tstep in range(TimeSteps):
@@ -178,35 +189,31 @@ for tstep in range(TimeSteps):
         print(Histo)
 
     if tstep in PressureTimes:
-        print("Pressure = " + str(Pressure()))
-
+        DistTimesForce.append(SumDistTimesForce())
     AllPositions[tstep + 1] = (Particles.copy())
 
-Histo = Histo * (1 / (len(HistTimes)))
-print(Histo)
 
-BinSize = BoxSize / (2 * HistBins)
-PairCorrelationDifferent = [(2 * BoxSize ** 3 * Histo[i]) / (
-        ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
-                            range(len(Histo))]
-print("(r+Binsize)^2 instead " + str(PairCorrelationDifferent))
+if TimeSteps > HistStart:
+    Histo = Histo*(1/(len(HistTimes)))
+    BinSize = BoxSize/(2 * HistBins)
+    print("(r+Binsize)^2 instead " + str(PairCorrelation()))
 
-PairCorrelation = [(2 * BoxSize ** 3 * Histo[i + 1]) / (
-        ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
-                   range(len(Histo) - 1)]
-print("Skipped first one" + str(PairCorrelation))
+    #PairCorrelation = [(2*BoxSize**3*Histo[i+1]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo) - 1)]
+    #print("Skipped first one" + str(PairCorrelation))
+
+print("Pressure of the system = " + str(Pressure()))
 
 # print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 if CreatePlots:
-    plot2 = figure(2)
-    plot(range(0, TimeSteps, 10), Epot)
-    plot(range(0, TimeSteps, 10), Ekin)
-    plot(range(0, TimeSteps, 10), Etot)
-    legend(["Epot", "Ekin", "Etot"])
+    plot2 = plt.figure(2)
+    plt.plot(range(0, TimeSteps, 10), Epot)
+    plt.plot(range(0, TimeSteps, 10), Ekin)
+    plt.plot(range(0, TimeSteps, 10), Etot)
+    plt.legend(["Epot", "Ekin", "Etot"])
 
-    fig, ax = subplots()
-    ln1, = plot([], [], 'ro')
+    fig, ax = plt.subplots()
+    ln1, = plt.plot([], [], 'ro')
 
 
     def init():
@@ -219,4 +226,4 @@ if CreatePlots:
 
 
     ani = FuncAnimation(fig, update, frames=int(TimeSteps / 10 + 1), interval=10, init_func=init)
-    show()
+    plt.show()

@@ -34,20 +34,19 @@ if args.Temperature is None:
 else:
     Temperature = float(args.Temperature[0])
 
-
-#Temperature = 0.5  #Make this an input variable later
-#Density= 1.2 #In units, atoms/sigma**3, make input variable later
+#Temperature = 3.0  #Make this an input variable later
+#Density= 0.3 #In units, atoms/sigma**3, make input variable later
 Mass=1 #Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  #Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
-TimeSteps = 400
+TimeSteps = 1000
 TimeStepLength = 0.001
 
 HistBins = 20
 HistStart = 100
 HistTimes = [HistStart + (1+x) * 50 for x in range(int((TimeSteps - HistStart) / 50))]
 RescaleTimes = [15,50,80,150]
-PressureTimes = [20, 80, 200, 250, 300,350]
+PressureTimes = [200, 250, 300,350,400,450,500,550,600,650,700,750,800,850,900,950]
 
 
 RandomInitialisation = False
@@ -57,10 +56,10 @@ Particles = []
 if RandomInitialisation:
     ParticleAmount = 8
     Dimension = 2
-    Particlevelocity = 0.001
+    ParticleVelocity = 0.001
     for l in range(ParticleAmount):
 
-        Partic = [[BoxSize * random.random() for d in range(Dimension)], [2 * Particlevelocity * (random.random() - 0.5) for d in range(Dimension)]]
+        Partic = [[BoxSize * random.random() for d in range(Dimension)], [2 * ParticleVelocity * (random.random() - 0.5) for d in range(Dimension)]]
         Particles.append(Partic)
 else:
     Dimension=3
@@ -172,24 +171,29 @@ def Histogram(Bins):
     #Histo = 2*Histo
     return Histo
 
-
-def Pressure():
+DistTimesForce = []
+def SumDistTimesForce():
     '''
-    Can be called to save the pressure of the system at the current timestep
+    Can be called to save the sum of the Distance times the Force of all particle pairs, this will later be averaged to calculate the pressure
     '''
-    DistTimesForce = []
+    DistTimesForce = 0
     for i in range(ParticleAmount):
         for j in range(ParticleAmount - i - 1):
             Dist = DistancePoints(Particles[1+i+j,0],Particles[i,0])
-            DistTimesForce.append(12*(-2/Dist**12 + 1/Dist**6))
-    Pressure = 1 - (np.average(np.array(DistTimesForce)) / (3 * ParticleAmount * Temperature))
-    print(np.average(np.array(DistTimesForce)))
-    print(Dist)
+            DistTimesForce += (12*(-2/Dist**12 + 1/Dist**6))
+    return DistTimesForce
+
+def Pressure():
+    print(DistTimesForce)
+    Pressure = Temperature*Density - (Density*np.average(np.array(DistTimesForce)))/(3*ParticleAmount)
     return Pressure
 
-
-
-
+def PairCorrelation():
+    PairCorrel = [(2 * BoxSize ** 3 * Histo[i]) / (
+                ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
+     range(len(Histo))]
+    print("This is PairCorrel" + str(PairCorrel))
+    return PairCorrel
 
 
 for tstep in range(TimeSteps):
@@ -217,40 +221,39 @@ for tstep in range(TimeSteps):
         print(Histo)
 
     if tstep in PressureTimes:
-        print("Pressure = " + str(Pressure()))
+        DistTimesForce.append(SumDistTimesForce())
+
 
     AllPositions[tstep + 1] = (Particles.copy())
 
 
-Histo = Histo*(1/(len(HistTimes)))
-print(Histo)
+if TimeSteps > HistStart:
+    Histo = Histo*(1/(len(HistTimes)))
+    BinSize = BoxSize/(2 * HistBins)
+    print("(r+Binsize)^2 instead " + str(PairCorrelation()))
 
-BinSize = BoxSize/(2 * HistBins)
-PairCorrelationDifferent = [(2*BoxSize**3*Histo[i]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo))]
-print("(r+Binsize)^2 instead " + str(PairCorrelationDifferent))
+    #PairCorrelation = [(2*BoxSize**3*Histo[i+1]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo) - 1)]
+    #print("Skipped first one" + str(PairCorrelation))
 
-PairCorrelation = [(2*BoxSize**3*Histo[i+1]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo) - 1)]
-print("Skipped first one" + str(PairCorrelation))
-
-
+print("Pressure of the system = " + str(Pressure()))
 
 #print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 if CreatePlots:
-    plot2 = figure(2)
-    plot(range(0, TimeSteps, 10), Epot)
-    plot(range(0, TimeSteps, 10), Ekin)
-    plot(range(0, TimeSteps, 10), Etot)
-    legend(["Epot", "Ekin", "Etot"])
+    plot2 = plt.figure(2)
+    plt.plot(range(0, TimeSteps, 10), Epot)
+    plt.plot(range(0, TimeSteps, 10), Ekin)
+    plt.plot(range(0, TimeSteps, 10), Etot)
+    plt.legend(["Epot","Ekin","Etot"])
 
 
-    fig, ax = subplots()
-    ln1, = plot([], [], 'ro')
+    fig, ax = plt.subplots()
+    ln1, = plt.plot([], [], 'ro')
     def init():
         ax.set_xlim(0, BoxSize)
         ax.set_ylim(0, BoxSize)
     def update(q):
         ln1.set_data([AllPositions[int(10 * q)][:, 0, 0]], [AllPositions[int(10 * q)][:, 0, 1]])
     ani = FuncAnimation(fig, update, frames=int((TimeSteps) / 10 + 1), interval=10, init_func=init)
-    show()
+    plt.show()
 
