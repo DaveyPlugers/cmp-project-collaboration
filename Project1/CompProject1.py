@@ -1,22 +1,31 @@
 """
-
-
-"""
-
 # Framework of Allposition array: Allposition[i][j][k] =>
 # i gives timestep [Timestep0,Timestep1,Timestep2,...] Will be appended like that where =>
 # j gives particle number Timestep0 = [Particle1,Particle2] where =>
 # k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,veljvector]
+"""
 
+# import part
+import os
 import math
+import random
+import datetime
+import argparse
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy import ndarray
 from tqdm import tqdm
-import random
-import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import argparse
+from scipy.interpolate import make_interp_spline
 
+# creat folder
+nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
+
+if not os.path.exists(folder):
+    os.makedirs(folder)
+
+# parser part
 parser = argparse.ArgumentParser()
 parser.add_argument('--Density',
                     help='Value of box density, default: 1',
@@ -36,18 +45,21 @@ if args.Temperature is None:
 else:
     Temperature = float(args.Temperature[0])
 
-# Temperature = 3.0  #Make this an input variable later
-# Density= 0.3 #In units, atoms/sigma**3, make input variable later
+# set initial condition
+# Temperature = 3.0  # Make this an input variable later
+# Density = 0.3  # In units, atoms/sigma**3, make input variable later
 Mass = 1  # Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
-TimeSteps = 5000
+TimeSteps = 500
 TimeStepLength = 0.001
 
 HistBins = 20
 HistStart = 100
-HistTimes = [HistStart + (1 + x) * 50 for x in range(int((TimeSteps - HistStart) / 50))]
-RescaleTimes = [15, 50, 80, 150]
+HistTimes = np.linspace(HistStart, TimeSteps, num=int(((TimeSteps - HistStart) / 50)) + 1)
+RescaleTimes = np.linspace(100, TimeSteps, num=int(TimeSteps / 100))
+# RescaleTimes = [15, 50, 80, 150]
+# HistTimes = [HistStart + (1 + x) * 50 for x in range(int((TimeSteps - HistStart) / 50))]
 PressureTimes = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950]
 
 RandomInitialisation = False
@@ -82,6 +94,7 @@ AllPositions = [[] for x in range(TimeSteps + 1)]  # Premaking is faster than ap
 AllPositions[0] = Particles.copy()
 
 
+# function part
 def DistancePoints(Vector1, Vector2):
     """
     Takes 2 position vectors and calculates distance between them
@@ -207,13 +220,14 @@ def PairCorrelation():
     return PairCorrel
 
 
+# running simulation
 bar = tqdm(range(TimeSteps))
 for tstep in bar:
     bar.set_description(f"running simulation")
     # print("timestep = " + str(tstep))
     for j in range(ParticleAmount):
         Particles[j, 0] = Particles[j, 0] + Particles[j, 1] * TimeStepLength + TimeStepLength ** 2 / (
-                    2 * Mass) * TotalForce(j, tstep)
+                2 * Mass) * TotalForce(j, tstep)
         Particles[j, 0] = Particles[j, 0] % BoxSize
     for j in range(ParticleAmount):
         Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * (TotalForce(j, -1) + TotalForce(j, tstep))
@@ -239,8 +253,9 @@ for tstep in bar:
     AllPositions[tstep + 1] = (Particles.copy())
 
 if TimeSteps > HistStart:
-    Histo = Histo * (1 / (len(HistTimes)))
+    Histo = Histo * (1 / (len(HistTimes) - 1))
     BinSize = BoxSize / (2 * HistBins)
+    g = PairCorrelation()
     print("(r+Binsize)^2 instead " + str(PairCorrelation()))
 
     # PairCorrelation = [(2*BoxSize**3*Histo[i+1]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo) - 1)]
@@ -250,12 +265,28 @@ print("Pressure of the system = " + str(Pressure()))
 
 # print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
+# make plots
 if CreatePlots:
-    plot2 = plt.figure(2)
+    plot1 = plt.figure(1)
     plt.plot(range(0, TimeSteps, 10), Epot)
     plt.plot(range(0, TimeSteps, 10), Ekin)
     plt.plot(range(0, TimeSteps, 10), Etot)
+    plt.xlabel('timestep')
+    plt.ylabel('dimensionless energy')
     plt.legend(["Epot", "Ekin", "Etot"])
+    plt.title('energy')
+    plt.savefig(folder + '\\' + 'energy.png')
+
+    plot2 = plt.figure(2)
+    xnew = np.linspace(0, HistBins - 1, 300)
+    g_smooth = make_interp_spline(range(HistBins), g)(xnew)
+    plt.plot(xnew, g_smooth)
+    plt.xlabel('r')
+    plt.ylabel('g(r)')
+    plt.title('pair correlation function')
+    #plt.legend()
+    plt.savefig(folder + '\\' + 'pair_correlation.png')
+    # plt.show()
 
     fig, ax = plt.subplots()
     ln1, = plt.plot([], [], 'ro')
@@ -271,4 +302,5 @@ if CreatePlots:
 
 
     ani = FuncAnimation(fig, update, frames=int(TimeSteps / 10 + 1), interval=10, init_func=init)
-    plt.show()
+    ani.save(folder + '\\' + 'animation.gif', writer='pillow')
+    #plt.show()
