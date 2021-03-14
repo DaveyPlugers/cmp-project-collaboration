@@ -51,7 +51,7 @@ else:
 Mass = 1  # Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
 print("Boxsize = " + str(BoxSize))
-TimeSteps = 500
+TimeSteps = 10000
 TimeStepLength = 0.001
 
 HistBins = 20
@@ -231,7 +231,7 @@ for tstep in bar:
         Particles[j, 0] = Particles[j, 0] % BoxSize
     for j in range(ParticleAmount):
         NewForce = TotalForce(j, -1)
-        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * ((NewForce + ForcePrevious[j])
+        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * (NewForce + ForcePrevious[j])
         ForcePrevious[j] = NewForce
                                                                            
     if tstep % 10 == 0:
