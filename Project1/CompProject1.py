@@ -219,7 +219,7 @@ def PairCorrelation():
     print("This is PairCorrel" + str(PairCorrel))
     return PairCorrel
 
-
+ForcePrevious = [np.array(TotalForce(k,0)) for k in range(ParticleAmount)]
 # running simulation
 bar = tqdm(range(TimeSteps))
 for tstep in bar:
@@ -227,11 +227,13 @@ for tstep in bar:
     # print("timestep = " + str(tstep))
     for j in range(ParticleAmount):
         Particles[j, 0] = Particles[j, 0] + Particles[j, 1] * TimeStepLength + TimeStepLength ** 2 / (
-                2 * Mass) * TotalForce(j, tstep)
+                2 * Mass) * ForcePrevious[j]
         Particles[j, 0] = Particles[j, 0] % BoxSize
     for j in range(ParticleAmount):
-        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * (TotalForce(j, -1) + TotalForce(j, tstep))
-
+        NewForce = TotalForce(j, -1)
+        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * ((NewForce + ForcePrevious[j])
+        ForcePrevious[j] = NewForce
+                                                                           
     if tstep % 10 == 0:
         Energy()
 
