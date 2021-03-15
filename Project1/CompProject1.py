@@ -65,7 +65,8 @@ HistTimes = np.linspace(HistStart, TimeSteps, num=int(((TimeSteps - HistStart) /
 RescaleTimes = np.linspace(100, TimeSteps, num=int(TimeSteps / 100))
 # RescaleTimes = [15, 50, 80, 150]
 # HistTimes = [HistStart + (1 + x) * 50 for x in range(int((TimeSteps - HistStart) / 50))]
-PressureTimes = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950]
+#PressureTimes = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950]
+PressureTimes = 250
 
 f = open(folder1 + '\\' + 'output.txt', 'w')
 f.write('Initial condition: Temperature =' + str(Temperature) + ' Density = ' + str(Density))
@@ -259,7 +260,7 @@ for tstep in bar:
         Histo += Histogram(HistBins)
         #print(Histo)
 
-    if tstep in PressureTimes:
+    if tstep%PressureTimes==0 and tstep > 1:
         DistTimesForce.append(SumDistTimesForce())
 
     AllPositions[tstep + 1] = (Particles.copy())
