@@ -18,12 +18,17 @@ from tqdm import tqdm
 from matplotlib.animation import FuncAnimation
 from scipy.interpolate import make_interp_spline
 
-# creat folder
+# create folder
 nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
 
 if not os.path.exists(folder):
     os.makedirs(folder)
+
+folder1 = os.getcwd() + '\\' + nowTime + '\\' + 'data'
+
+if not os.path.exists(folder1):
+    os.makedirs(folder1)
 
 # parser part
 parser = argparse.ArgumentParser()
@@ -50,7 +55,7 @@ else:
 # Density = 0.3  # In units, atoms/sigma**3, make input variable later
 Mass = 1  # Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
-print("Boxsize = " + str(BoxSize))
+# print("Boxsize = " + str(BoxSize))
 TimeSteps = 10000
 TimeStepLength = 0.001
 
@@ -62,8 +67,12 @@ RescaleTimes = np.linspace(100, TimeSteps, num=int(TimeSteps / 100))
 # HistTimes = [HistStart + (1 + x) * 50 for x in range(int((TimeSteps - HistStart) / 50))]
 PressureTimes = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950]
 
+f = open(folder1 + '\\' + 'output.txt', 'w')
+f.write('Initial condition: Temperature =' + str(Temperature) + ' Density = ' + str(Density))
+f.close()
+
 RandomInitialisation = False
-CreatePlots = True
+CreatePlots = False
 
 Particles = []
 if RandomInitialisation:
@@ -207,7 +216,7 @@ def SumDistTimesForce():
 
 
 def Pressure():
-    print(DistTimesForce)
+    #print(DistTimesForce)
     P = Temperature * Density - (Density * np.average(np.array(DistTimesForce))) / (3 * ParticleAmount)
     return P
 
@@ -216,10 +225,11 @@ def PairCorrelation():
     PairCorrel = [(2 * BoxSize ** 3 * Histo[i]) / (
             ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
                   range(len(Histo))]
-    print("This is PairCorrel" + str(PairCorrel))
+    #print("This is PairCorrel" + str(PairCorrel))
     return PairCorrel
 
-ForcePrevious = [np.array(TotalForce(k,0)) for k in range(ParticleAmount)]
+
+ForcePrevious = [np.array(TotalForce(k, 0)) for k in range(ParticleAmount)]
 # running simulation
 bar = tqdm(range(TimeSteps))
 for tstep in bar:
@@ -233,7 +243,7 @@ for tstep in bar:
         NewForce = TotalForce(j, -1)
         Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * (NewForce + ForcePrevious[j])
         ForcePrevious[j] = NewForce
-                                                                           
+
     if tstep % 10 == 0:
         Energy()
 
@@ -247,7 +257,7 @@ for tstep in bar:
         Histo = Histogram(HistBins)
     elif tstep in HistTimes:
         Histo += Histogram(HistBins)
-        print(Histo)
+        #print(Histo)
 
     if tstep in PressureTimes:
         DistTimesForce.append(SumDistTimesForce())
@@ -258,13 +268,15 @@ if TimeSteps > HistStart:
     Histo = Histo * (1 / (len(HistTimes) - 1))
     BinSize = BoxSize / (2 * HistBins)
     g = PairCorrelation()
-    print("(r+Binsize)^2 instead " + str(PairCorrelation()))
+    # print("(r+Binsize)^2 instead " + str(PairCorrelation()))
 
     # PairCorrelation = [(2*BoxSize**3*Histo[i+1]) / (ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in range(len(Histo) - 1)]
     # print("Skipped first one" + str(PairCorrelation))
 
-print("Pressure of the system = " + str(Pressure()))
-
+# print("Pressure of the system = " + str(Pressure()))
+f = open(folder1 + '\\' + 'output.txt', 'a')
+f.write('\nAfter all timesteps, pressure of the system =' + str(Pressure()))
+f.close()
 # print(Allpositions[0:5]) #Used for checking mistakes in simulation, remove later
 
 # make plots
@@ -286,7 +298,7 @@ if CreatePlots:
     plt.xlabel('r')
     plt.ylabel('g(r)')
     plt.title('pair correlation function')
-    #plt.legend()
+    # plt.legend()
     plt.savefig(folder + '\\' + 'pair_correlation.png')
     # plt.show()
 
@@ -305,4 +317,4 @@ if CreatePlots:
 
     ani = FuncAnimation(fig, update, frames=int(TimeSteps / 10 + 1), interval=10, init_func=init)
     ani.save(folder + '\\' + 'animation.gif', writer='pillow')
-    #plt.show()
+    # plt.show()
