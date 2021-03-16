@@ -56,7 +56,7 @@ else:
 Mass = 1  # Mass in atomic mass units
 BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
 # print("Boxsize = " + str(BoxSize))
-TimeSteps = 10000
+TimeSteps = 500
 TimeStepLength = 0.001
 
 HistBins = 20
@@ -73,7 +73,7 @@ f.write('Initial condition: Temperature =' + str(Temperature) + ' Density = ' + 
 f.close()
 
 RandomInitialisation = False
-CreatePlots = False
+CreatePlots = True
 
 Particles = []
 if RandomInitialisation:
@@ -295,6 +295,7 @@ if CreatePlots:
     plot2 = plt.figure(2)
     xnew = np.linspace(0, HistBins - 1, 300)
     g_smooth = make_interp_spline(range(HistBins), g)(xnew)
+    plt.scatter(range(HistBins), g)
     plt.plot(xnew, g_smooth)
     plt.xlabel('r')
     plt.ylabel('g(r)')
