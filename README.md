@@ -24,9 +24,9 @@ The code requires the following(some of the functionality might work with older 
 - scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
-In our repository, we provide you a bat profile `run.bat` with some arguments. You can directly run this profile on your machine.
+In our repository, we provide you a bat profile `run.bat` with some arguments. You can directly run this profile on your machine to make a test.
 ```
-python3 simulation.py --Density 0.3 --Temperature 3 --Timestep 10000 --Energy --Correlation --Pressure --Animation2d
+python CompProject1.py --Density 0.3 --Temperature 3 --Pressure --Timestep 500 --Energy --Correlation
 ```
 In this profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
 1. --Density
