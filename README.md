@@ -30,21 +30,21 @@ python3 simulation.py --Density 0.3 --Temperature 3 --Timestep 10000 --Energy --
 ```
 In this profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
 1. --Density
-Set the initial density of system. The default value is 1.
+<br/>Set the initial density of system. The default value is 1.
 2. --Temperature
-Set the initial density of system. The default value is 1.
+<br/>Set the initial density of system. The default value is 1.
 3. --Timestep
-Set the timestep of system. The default value is 10000. Runing 10000 timesteps will cost you 35 minutes.
+<br/>Set the timestep of system. The default value is 10000. Runing 10000 timesteps will cost you 35 minutes.
 4. --Energy
-Can generate system energy plot in folder `./plot`, named `energy.png`.
+<br/>Can generate system energy plot in folder `./plot`, named `energy.png`.
 5. --Correlation
-Can generate system pair correlation function plot in folder `./plot`, named `pair_correlation.png`.
+<br/>Can generate system pair correlation function plot in folder `./plot`, named `pair_correlation.png`.
 6. --Pressure
-Can output the system pressure in folder `./data`, named `output.txt`.
+<br/>Can output the system pressure in folder `./data`, named `output.txt`.
 7. --Animation2d
-Can generate system 2d animation in folder `./plot`, named `animation.gif`
+<br/>Can generate system 2d animation in folder `./plot`, named `animation.gif`
 8. --RandomInitialisation
-This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
+<br/>This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
