@@ -122,7 +122,7 @@ BoxSize = 3 * (4 / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
 TimeStepLength = 0.001
 
 HistBins = 50
-HistStart = 100
+HistStart = 200
 HistTimes = np.linspace(HistStart, TimeSteps, num=int(((TimeSteps - HistStart) / 50)) + 1)
 RescaleTimes = np.linspace(100, TimeSteps, num=int(TimeSteps / 100))
 PressureTimes = 250
