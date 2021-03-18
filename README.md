@@ -45,6 +45,8 @@ In this profile, you can manually change the argument we provided to get quantit
 <br/>Can generate system 2d animation in folder `./plot`, named `animation.gif`
 8. --RandomInitialisation
 <br/>This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
+### Relevant report
+For detail about MOSA, you can check out our report.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
