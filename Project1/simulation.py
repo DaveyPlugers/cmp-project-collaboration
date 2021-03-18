@@ -1,8 +1,30 @@
 """
-# Framework of Allposition array: Allposition[i][j][k] =>
-# i gives timestep [Timestep0,Timestep1,Timestep2,...] Will be appended like that where =>
-# j gives particle number Timestep0 = [Particle1,Particle2] where =>
-# k=0 gives position vector, k=1 gives velocity vector Particlej = [posjvector,veljvector]
+Molecular Dynamics code written by Zhen Xiang & Davey Plugers
+
+Can be called with a specified density and temperature to simulate the molecular dynamics with minimum image convention
+of an fcc crystal roster consisting of 3x3x3 cubes. Afterwards it will show the energy throughout the simulation and calculate
+the pair correlation function and pressure of the system.
+_________________________________________________________
+
+Functions available:
+
+DistancePoints(Vector1, Vector2)
+
+VecPairLJForce(Vector1, Vector2)
+
+TotalForce(j, tstep)
+
+Energy()
+
+Rescale()
+
+Histogram(Bins)
+
+SumDistTimesForce()
+
+Pressure()
+
+PairCorrelation()
 """
 
 # import part
@@ -95,8 +117,8 @@ if Animation:
     print('starting making 2D animation')
 
 # set initial condition
-Mass = 1
-BoxSize = 3 * (4 * Mass / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
+
+BoxSize = 3 * (4 / Density) ** (1 / 3)  # Times 4 since 4 particles per cube
 TimeStepLength = 0.001
 
 HistBins = 20
@@ -130,7 +152,8 @@ elif not RandomInitialisation:
         for j in range(6):
             for k in range(3):
                 Partic = [[k * BoxSize / 3 + (j + i) % 2 * BoxSize / 6, j * BoxSize / 6, i * BoxSize / 6],
-                          # Modulo operators create FCC lattice structure
+                            # Modulo operators create FCC lattice structure, to increase cube amounts from 3 -> n replace all 3 with n and 6 with 2n 
+                            #in the for loops and the Partic expression
                           [Velocities[3 * ParticleNumber], Velocities[3 * ParticleNumber + 1],
                            Velocities[3 * ParticleNumber + 2]]]
                 ParticleNumber += 1
@@ -175,7 +198,7 @@ def TotalForce(j, tstep):
     """
 
     TotalForce = np.array([0 for l in range(Dimension)], dtype=np.float64)
-    if tstep == -1:  # This is a workaround to get the updated position and thus updated force
+    if tstep == -1:   # This is for the updated position and thus updated force
         for i in range(ParticleAmount):
             if i != j:
                 TotalForce += VecPairLJForce(Particles[j, 0], Particles[i, 0])
@@ -183,7 +206,7 @@ def TotalForce(j, tstep):
         for i in range(ParticleAmount):
             if i != j:
                 TotalForce += VecPairLJForce(AllPositions[tstep][j, 0], AllPositions[tstep][i][
-                    0])  # We use the Allpositions instead of Particles since we need the old positions
+                    0])  # We use the Allpositions for old positions
 
     return TotalForce
 
@@ -191,8 +214,6 @@ def TotalForce(j, tstep):
 Epot = []
 Ekin = []
 Etot = []
-
-
 def Energy():
     """
     Can be called to save the potential,kinetic and total energy of the system at the current timestep
@@ -201,12 +222,12 @@ def Energy():
     kin = 0
     for j in range(ParticleAmount):
         pot1 = 0
-        kin += (0.5 * Mass) * (sum([x * x for x in Particles[j, 1]]))
+        kin += (0.5) * (sum([x * x for x in Particles[j, 1]]))
         for k in range(ParticleAmount):
             if k != j:
                 r = DistancePoints(Particles[j, 0], Particles[k, 0])
                 pot1 += 4 * ((1 / r) ** 12 - (1 / r) ** 6)
-        pot += pot1 / 2  # *0.5 to prevent double counting
+        pot += pot1 / 2  # *0.5 to prevent double counting, can rewrite the range too to save time
     Epot.append(pot)
     Ekin.append(kin)
     Etot.append(pot + kin)
@@ -234,16 +255,14 @@ def Histogram(Bins):
     for i in range(ParticleAmount):
         Distances = [DistancePoints(Particles[1 + i + j, 0], Particles[i, 0]) for j in range(ParticleAmount - i - 1)]
         Histo += np.histogram(Distances, bins=[BoxSize / (2 * Bins) * x for x in range(Bins + 1)])[0]
-    # Histo = 2*Histo
     return Histo
 
 
 DistTimesForce = []
-
-
 def SumDistTimesForce():
     """
     Can be called to save the sum of the Distance times the Force of all particle pairs, this will later be averaged to calculate the pressure
+    :return: Sum of the distance times force of all particle pairs.
     """
     DistTimesForce = 0
     for i in range(ParticleAmount):
@@ -255,7 +274,7 @@ def SumDistTimesForce():
 
 def Pressure():
     """
-    Can be called to calculate system pressure
+    Calculates the pressure by averaging the DistTimesForce values and inserting this value.
     :return: pressure value
     """
     P = Temperature * Density - (Density * np.average(np.array(DistTimesForce))) / (3 * ParticleAmount)
@@ -264,28 +283,28 @@ def Pressure():
 
 def PairCorrelation():
     """
-    Can be called to calculate system pair correlation function
+    Calculates the pair correlation function and adds g(0)=0 manually to prevent zero division
     :return: pair correlation value
     """
-    PairCorrel = [(2 * BoxSize ** 3 * Histo[i]) / (
+    PairCorrel = [(2 * BoxSize ** 3 * Histo[i+1]) / (
             ParticleAmount * (ParticleAmount - 1) * 4 * math.pi * ((i + 1) * BinSize) ** 2 * BinSize) for i in
-                  range(len(Histo))]
-    return PairCorrel
+                  range(len(Histo)-1)]
+    return [0] + PairCorrel
 
 
-ForcePrevious = [np.array(TotalForce(k, 0)) for k in range(ParticleAmount)]
 
 # running simulation
+ForcePrevious = [np.array(TotalForce(k, 0)) for k in range(ParticleAmount)]
 bar = tqdm(range(TimeSteps))
 for tstep in bar:
     bar.set_description(f"running simulation")
     for j in range(ParticleAmount):
         Particles[j, 0] = Particles[j, 0] + Particles[j, 1] * TimeStepLength + TimeStepLength ** 2 / (
-                2 * Mass) * ForcePrevious[j]
+                2) * ForcePrevious[j]
         Particles[j, 0] = Particles[j, 0] % BoxSize
     for j in range(ParticleAmount):
         NewForce = TotalForce(j, -1)
-        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2 * Mass) * (NewForce + ForcePrevious[j])
+        Particles[j, 1] = Particles[j, 1] + TimeStepLength / (2) * (NewForce + ForcePrevious[j])
         ForcePrevious[j] = NewForce
 
     if ENERGY:
@@ -304,7 +323,7 @@ for tstep in bar:
             Histo += Histogram(HistBins)
 
     if PRESSURE:
-        if tstep % PressureTimes == 0 and tstep > 1:
+        if tstep % PressureTimes == 0 and tstep > 1: #Skip tstep==0 since not equilibrium yet
             DistTimesForce.append(SumDistTimesForce())
 
     AllPositions[tstep + 1] = (Particles.copy())
@@ -329,20 +348,22 @@ if ENERGY:
     plt.plot(range(0, TimeSteps, 10), Ekin)
     plt.plot(range(0, TimeSteps, 10), Etot)
     plt.xlabel('timestep')
-    plt.ylabel('dimensionless energy')
+    plt.ylabel('Energy (units in epsilon)')
     plt.legend(["Epot", "Ekin", "Etot"])
     plt.title('energy')
     plt.savefig(folder + '\\' + 'energy.png')
 
 if Correlation:
     plot2 = plt.figure(2)
-    xnew = np.linspace(0, HistBins - 1, 300)
+    xnew = np.linspace(0, HistBins, 300)
     g_smooth = make_interp_spline(range(HistBins), g)(xnew)
-    plt.scatter(range(HistBins), g)
-    plt.plot(xnew, g_smooth)
-    plt.xlabel('r')
+    plt.scatter([3*(i)/(2*HistBins) for i in range(HistBins)], g, label='data points', c='b')
+    plt.plot(1.5*xnew/(HistBins), g_smooth, label ='fitting curve')
+    plt.legend(loc="upper left")
+    plt.ylim(bottom=-0.3)
+    plt.xlabel('r (units a_1)')
     plt.ylabel('g(r)')
-    plt.title('pair correlation function')
+    plt.title('Pair Correlation Function: rho = ' +str(Density) + ' T = ' + str(Temperature))
     plt.savefig(folder + '\\' + 'pair_correlation.png')
 
 if Animation:
