@@ -132,7 +132,7 @@ f = open(folder1 + '\\' + 'output.txt', 'w')
 f.write('Initial condition: Temperature = ' + str(Temperature) + ' Density = ' + str(Density))
 f.close()
 
-
+# Generate particle set
 Particles = []
 if RandomInitialisation:
     ParticleAmount = 8
