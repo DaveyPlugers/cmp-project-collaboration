@@ -24,7 +24,7 @@ The code requires the following(some of the functionality might work with older 
 - scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
-In our repository, we provide you a bat profile `run.bat` with some arguments. You can directly run this profile on your machine to make a test.
+In our repository, we provide you a bat profile `run.bat` with some arguments. You can directly run this profile on your machine to test, and it will take you around 2 minutes.
 ```
 python CompProject1.py --Density 0.3 --Temperature 3 --Pressure --Timestep 500 --Energy --Correlation
 ```
