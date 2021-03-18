@@ -1,18 +1,20 @@
 # CMP-project1
 ## MOSA
-This is the public repository for the code MOSA (MOlecular dynamics Simulation of Argon Atoms), which can be use to analyse the following quantities of different phase of argon(which is in the box of 108 argon particles):
+This is the public repository for the code MOSA (MOlecular dynamics Simulation of Argon Atoms), which can be use to analyse the following quantities of different phase of argon(which is in the 3D box of 108 argon particles with FCC lattice structure):
 - pair correlation function of system
 - pressure of system 
 - energy plot of system
 - 2D animation of syetem
 ### Installation
-Now MOSA can be worked on **Windows** and **Linux** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
+Now MOSA can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
 <br/>To install, there are two ways:
 1. **Download this repository**
 <br/>You can go to our [github page](https://github.com/boson112358/cmp-project) to download it and save it on your machine
 2. **Clone this repository**
 <br/>Clone it on your machine:
-<br/>`git clone https://github.com/boson112358/cmp-project`
+```
+git clone https://github.com/boson112358/cmp-project
+```
 #### Dependencies
 The code requires the following(some of the functionality might work with older versions):
 - Python version 3.9+
@@ -22,3 +24,27 @@ The code requires the following(some of the functionality might work with older 
 - scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
+In our repository, we provide you a bat profile `run.bat` with some arguments. You can directly run this profile on your machine.
+```
+python3 simulation.py --Density 0.3 --Temperature 3 --Timestep 10000 --Energy --Correlation --Pressure --Animation2d
+```
+In this profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
+1. --Density
+Set the initial density of system. The default value is 1.
+2. --Temperature
+Set the initial density of system. The default value is 1.
+3. --Timestep
+Set the timestep of system. The default value is 10000. Runing 10000 timesteps will cost you 35 minutes.
+4. --Energy
+Can generate system energy plot in folder `./plot`, named `energy.png`.
+5. --Correlation
+Can generate system pair correlation function plot in folder `./plot`, named `pair_correlation.png`.
+6. --Pressure
+Can output the system pressure in folder `./data`, named `output.txt`.
+7. --Animation2d
+Can generate system 2d animation in folder `./plot`, named `animation.gif`
+8. --RandomInitialisation
+This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
+### Authors
+- [Davey Plugers](https://github.com/DaveyPlugers)
+- [Zhen Xiang](https://github.com/boson112358)
