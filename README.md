@@ -46,7 +46,7 @@ In this profile, you can manually change the argument we provided to get quantit
 8. --RandomInitialisation
 <br/>This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
 ### Relevant report
-For detail about MOSA, you can check out our report.
+For detail about MOSA, you can check out our report in this repository.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
