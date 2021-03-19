@@ -32,7 +32,7 @@ In `run.bat` profile, you can manually change the argument we provided to get qu
 1. --Density
 <br/>Set the initial density of system. The default value is 1.
 2. --Temperature
-<br/>Set the initial density of system. The default value is 1.
+<br/>Set the initial temperature of system. The default value is 1.
 3. --Timestep
 <br/>Set the timestep of system. The default value is 10000. Runing 10000 timesteps will cost you 35 minutes. Make sure this is a multiple of 100 if you want to calculate the Correlation.
 4. --Energy
