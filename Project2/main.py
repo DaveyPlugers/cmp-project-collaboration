@@ -23,9 +23,17 @@ parser.add_argument('--Temperature',
                     help='Value of system temperature, default: 1',
                     nargs=1)
 
+parser.add_argument('--Lattice',
+                    help='Width of the grid in spins sites, default: 50',nargs=1)
+parser.add_argument('--Equilibrium_time',
+                    help='Time duration until system is considered in equilibrium: 1000',nargs=1)
 parser.add_argument('--Correlation_time',
                     help='Value of system correlation time, default: 1',
                     nargs=1)
+parser.add_argument('--Total_Duration',
+                    help='Time duration the total simulation will run in correlation mode, default: 3000',nargs=1)
+parser.add_argument('--Data_Points',
+                    help='Amount of independent blocks to calculate physical quantities: 20',nargs=1)
 
 parser.add_argument('--Correlation_Mode',
                     help='Analysis system to get the correlation time',
@@ -45,10 +53,32 @@ if args.Temperature is None:
 else:
     Temperature = float(args.Temperature[0])
 
-if args.Correlation_time is None:
-    t_correlation = 1.
+if args.Lattice is None:
+    Lattice = 50
 else:
-    t_correlation = float(args.Correlation_time[0])
+    Lattice = int(args.Lattice[0])
+
+if args.Equilibrium_time is None:
+    t_equilibrium = 1000
+else:
+    t_equilibrium = int(args.Equilibrium_time[0])
+
+if args.Correlation_time is None:
+    t_correlation = 1
+else:
+    t_correlation = int(args.Correlation_time[0])
+
+if args.Total_Duration is None:
+    Repetitions = Lattice**2 * 3000
+else:
+    Repetitions = Lattice**2 *int(args.Total_Duration[0])
+
+if args.Data_Points is None:
+    Amount_Blocks = 20
+else:
+    Amount_Blocks = int((args.Data_Points[0]))
+    
+
 
 J = 1
 KB = 1
@@ -268,7 +298,6 @@ if Thermodynamics_Mode:
         Energy_Array = np.append(Energy_Array, Energy)
         Magnetisation_Array = np.append(Magnetisation_Array, Sum_Of_Spins)
         if (i + 1) % 8 == 0:
-            # print("We are in the i+1%8 thing" + str(i))
             Magnet_Suscept_Array = np.append(Magnet_Suscept_Array, Magnetic_Suscept(Magnetisation_Array))
             Spec_Heat_Array = np.append(Spec_Heat_Array, Specific_Heat(Energy_Array))
             Energy_Array = np.array([])
@@ -293,12 +322,16 @@ if Thermodynamics_Mode:
     f.close()
 
 if Correlation_Mode:
+    Calculated_Correlation_Tau = [0,0,0,0]
     if t_equilibrium < Repetitions / LatticeSquared:
-        Auto_Corr = Auto_Correlation(t_equilibrium, Spin_Magn)
-        Calculated_Correlation_Tau = Correlation_Time(Auto_Corr)
+        for i in range(4):
+            Auto_Corr = Auto_Correlation(t_equilibrium, Multiple_Spin_Magn[i])
+            Calculated_Correlation_Tau[i] = ", " + str(Correlation_Time(Auto_Corr))
         # print(Calculated_Correlation_Tau)
         f = open(folder1 + '\\' + 'output.txt', 'a')
-        f.write('\nThe correlation time of the system is ' + str(Calculated_Correlation_Tau))
+        for j in range(4):
+            Values = ''.join(Calculated_Correlation_Tau)
+        f.write('\nThe correlation times of the system are: ' + Values)
         f.close()
         # plt.figure(3)
         # plt.plot(Auto_Corr)
@@ -314,5 +347,5 @@ if Thermodynamics_Mode:
 plt.figure(1)
 imgplot = plt.imshow(Spin_Array)
 plt.colorbar()
-
+plt.savefig(folder + '\\' + 'spin_alignment.png')
 # plt.show()
