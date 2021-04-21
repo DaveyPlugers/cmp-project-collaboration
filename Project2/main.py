@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-
 nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
 
@@ -19,37 +18,50 @@ folder1 = os.getcwd() + '\\' + nowTime + '\\' + 'data'
 if not os.path.exists(folder1):
     os.makedirs(folder1)
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--Temperature',
                     help='Value of system temperature, default: 1',
+                    nargs=1)
+
+parser.add_argument('--Correlation_time',
+                    help='Value of system correlation time, default: 1',
                     nargs=1)
 
 parser.add_argument('--Correlation_Mode',
                     help='Analysis system to get the correlation time',
                     action='store_true')
 
+parser.add_argument('--Thermodynamics_Mode',
+                    help='Analysis system to get the thermodynamics properties',
+                    action='store_true')
+
 args = parser.parse_args()
 
 Correlation_Mode = args.Correlation_Mode
+Thermodynamics_Mode = args.Thermodynamics_Mode
 
 if args.Temperature is None:
     Temperature = 1.
 else:
     Temperature = float(args.Temperature[0])
 
+if args.Correlation_time is None:
+    t_correlation = 1.
+else:
+    t_correlation = float(args.Correlation_time[0])
 
 J = 1
 KB = 1
-Temperature = 1.5
+# Temperature = 1.5
 Lattice = 50
 LatticeSquared = Lattice ** 2
 Repetitions = LatticeSquared * 5000
 # Time in units of steps per site
 t_equilibrium = 3000
-t_correlation = 5.1
-Amount_Blocks = 100
-Correlation_Mode = True
+# t_correlation = 5.11
+Amount_Blocks = 50
+# Correlation_Mode = True
+# Thermodynamics_Mode = True
 
 f = open(folder1 + '\\' + 'output.txt', 'w')
 f.write('Initial condition: Temperature = ' + str(Temperature))
@@ -178,14 +190,14 @@ def Specific_Heat(Energy_Array):
     return 1 / (KB * LatticeSquared * Temperature ** 2) * (np.mean(Energy_Array ** 2) - np.mean(Energy_Array) ** 2)
 
 
-def Standard_deviation(dataset):
+def Standard_deviation(dataset, t_Max):
     """
     Calculate the standard deviation for thermodynamics properties
     :param dataset: array of the thermodynamics properties
+    :param t_Max: total number of sweeps after equilibrium
     :return: Standard deviation value for the thermodynamics properties
     """
-    t_max = len(Spin_Magn) - t_equilibrium
-    return ((2 * t_correlation / t_max) * (np.mean(dataset ** 2) - np.mean(dataset) ** 2)) ** 0.5
+    return ((2 * t_correlation / t_Max) * (np.mean(dataset ** 2) - np.mean(dataset) ** 2)) ** 0.5
 
 
 # New structureplan: Have 2 different simulation possibilities:
@@ -219,22 +231,24 @@ for z in range(Amount_Initialisations):
             Energy += Delta_Energy
         if a % LatticeSquared == 0:
             Spin_Magn = Spin_Magnetization(Spin_Magn)
+
     if Correlation_Mode:
         Multiple_Spin_Magn[z] = Spin_Magn
         if not z == 3:
             Spin_Array = Random_Initialisation()
             bar = tqdm(range(Repetitions))
 
-if not Correlation_Mode:
-    Magn_PSpin = []
-    Energy_PSpin = []
-    Magnet_Suscept_Array = []
-    Spec_Heat_Array = []
+if Thermodynamics_Mode:
+    Magn_PSpin = np.array([])
+    Energy_PSpin = np.array([])
+    Magnet_Suscept_Array = np.array([])
+    Spec_Heat_Array = np.array([])
 
     Energy_Array = np.array([])  # Can use Energy_PSpin too but this is easier
     Magnetisation_Array = np.array([])
 
     Measurement_Rate = math.ceil(2 * t_correlation * LatticeSquared)
+    t_max = Amount_Blocks * 16 * t_correlation
     bar = tqdm(range(8 * Amount_Blocks))
     for i in bar:  # Create blocks of length 16*t_corr each consisting of 8 individual measurements every 2*t_corr
         for a in range(Measurement_Rate):
@@ -249,25 +263,34 @@ if not Correlation_Mode:
                 Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
                 Energy += Delta_Energy
         Sum_Of_Spins = np.sum(Spin_Array)
-        Magn_PSpin.append(abs(Sum_Of_Spins) / Lattice ** 2)
-        Energy_PSpin.append(Energy / Lattice ** 2)
+        Magn_PSpin = np.append(Magn_PSpin, abs(Sum_Of_Spins) / Lattice ** 2)
+        Energy_PSpin = np.append(Energy_PSpin, Energy / Lattice ** 2)
         Energy_Array = np.append(Energy_Array, Energy)
         Magnetisation_Array = np.append(Magnetisation_Array, Sum_Of_Spins)
         if (i + 1) % 8 == 0:
-            print("We are in the i+1%8 thing" + str(i))
-            Magnet_Suscept_Array.append(Magnetic_Suscept(Magnetisation_Array))
-            Spec_Heat_Array.append(Specific_Heat(Energy_Array))
+            # print("We are in the i+1%8 thing" + str(i))
+            Magnet_Suscept_Array = np.append(Magnet_Suscept_Array, Magnetic_Suscept(Magnetisation_Array))
+            Spec_Heat_Array = np.append(Spec_Heat_Array, Specific_Heat(Energy_Array))
             Energy_Array = np.array([])
             Magnetisation_Array = np.array([])
-    print(Magn_PSpin)
-    print(Energy_PSpin)
-    print("Magn suscept" + str(Magnet_Suscept_Array))
-    print("Specific heat" + str(Spec_Heat_Array))
-    print(np.mean(Magn_PSpin))
-    print(np.mean(Energy_PSpin))
-    print(np.mean(Magnet_Suscept_Array))
-    print(np.mean(Spec_Heat_Array))
-    print(Standard_deviation(Magn_PSpin))
+    # print(Magn_PSpin)
+    # print(Energy_PSpin)
+    # print("Magn suscept" + str(Magnet_Suscept_Array))
+    # print("Specific heat" + str(Spec_Heat_Array))
+    # print(np.mean(Magn_PSpin))
+    # print(np.mean(Energy_PSpin))
+    # print(np.mean(Magnet_Suscept_Array))
+    # print(np.mean(Spec_Heat_Array))
+    f = open(folder1 + '\\' + 'output.txt', 'a')
+    f.write('\nFor magnetization per spin, the mean is ' + str(np.mean(Magn_PSpin))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Magn_PSpin, t_max)))
+    f.write('\nFor energy per spin, the mean is ' + str(np.mean(Energy_PSpin))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Energy_PSpin, t_max)))
+    f.write('\nFor magnetic susceptibility per spin, the mean is ' + str(np.mean(Magnet_Suscept_Array))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Magnet_Suscept_Array, t_max)))
+    f.write('\nFor specific heat per spin, the mean is ' + str(np.mean(Spec_Heat_Array))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Spec_Heat_Array, t_max)))
+    f.close()
 
 if Correlation_Mode:
     if t_equilibrium < Repetitions / LatticeSquared:
@@ -284,7 +307,7 @@ if Correlation_Mode:
     for z in range(4):
         plt.plot(Multiple_Spin_Magn[z], Colours[z])
     plt.savefig(folder + '\\' + 'magnetization.png')
-else:
+if Thermodynamics_Mode:
     plt.figure(2)
     plt.plot(Spin_Magn)
 
