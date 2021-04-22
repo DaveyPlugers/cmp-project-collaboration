@@ -26,7 +26,6 @@ The code requires the following(some of the functionality might work with older 
 - argparse >= 1.4.0
 - matplotlib >= 3.3.4
 - numpy >= 1.20.1
-- scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
 For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
@@ -47,14 +46,16 @@ In `run.bat` profile, you can manually change the argument we provided to get qu
 <br/>Set the system correlation time. The default value is 1.
 5. --Total_Duration
 <br/>Set the time duration the total simulation will run in correlation mode. The default value is 3000, but in system the value is `Lattice ** 2 * 3000` .
-6. --Pressure
-<br/>Can output the system pressure in folder `./data`, named `output.txt`.
-7. --Animation2d
-<br/>Can generate system 2d animation in folder `./plot`, named `animation.gif`
-8. --RandomInitialisation
-<br/>This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
+6. --Data_Points
+<br/>The amount of independent blocks to calculate thermal properties. The default value is 20.
+7. --Correlation_Mode
+<br/>Turn on the correlation mode.
+8. --Thermodynamic_Mode
+<br/>Turn on the thermodynamic mode. It can output mean and standard deviation values of the thermodynamics properties in folder `./data`, named `output.txt`.
+9. --No_Plot
+<br/>Allows plots to be turned off. Otherwise, when using these two modes, you can find the corresponding plots in folder `./plot`.
 ### Relevant report
-For more detail about MOSA, you can check out our report in this repository.
+For more detail about MOSIM, you can check out our report in this repository.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
