@@ -1,6 +1,6 @@
 # CMP-project2
 ## MOSIM
-This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of different phase of argon(which is in the 3D box of 108 argon particles with FCC lattice structure):
+This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of :
 - pair correlation function of system
 - pressure of system 
 - energy plot of system
