@@ -4,6 +4,7 @@ This is the public repository for the code MOSIM (MOnte carlo Simulation of Isin
 - Magnetization plot of system
 - Spin alignment plot of system
 - Correlation time of system
+
 <br/>And it can also get the following mean and standard deviation values of the thermodynamics properties:
 - Magnetization per spin
 - Energy per spin
