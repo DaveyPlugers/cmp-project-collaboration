@@ -7,7 +7,7 @@ and the amount of requested data points.
 
 Afterwards in Correlation mode it will return a plot of the final spin alignment, 4 plots of the mean magnetisation of
 different simulations and 4 estimates of the correlation time.
-In Thermodynamics mode it will return a plot of the final spin alignment and an estimate of the mean and the standard deviation
+In Thermodynamic mode it will return a plot of the final spin alignment and an estimate of the mean and the standard deviation
 magnetisation per spin, energy per spin, magnetic susceptibility per spin and specific heat per spin
 _________________________________________________________
 
@@ -15,19 +15,19 @@ Functions available:
 
 Random_Initialisation()
 
-Energy_Calculation()
+Total_Energy()
 
 Energy_Difference(x_index, y_index)
 
-Flip_Calculator(Delta_Energy)
+Flip_Site(Delta_Energy)
 
 Auto_Correlation(t_equilibrium, Spin_Magn)
 
 Correlation_Time(Auto_Corr)
 
-Magnetic_Suscept(Magnetisation_Array)
+Magnetic_Suscept(Total_Magnetisations)
 
-Specific_Heat(Energy_Array)
+Specific_Heat(Total_Energy)
 
 Standard_deviation(dataset, t_Max)
 """
@@ -73,14 +73,14 @@ parser.add_argument('--Correlation_Mode',
                     help='Analysis system to get the correlation time',
                     action='store_true')
 
-parser.add_argument('--Thermodynamics_Mode',
-                    help='Analysis system to get the thermodynamics properties',
+parser.add_argument('--Thermodynamic_Mode',
+                    help='Analysis system to get the Thermodynamic properties',
                     action='store_true')
 
 args = parser.parse_args()
 
 Correlation_Mode = args.Correlation_Mode
-Thermodynamics_Mode = args.Thermodynamics_Mode
+Thermodynamic_Mode = args.Thermodynamic_Mode
 
 if args.Temperature is None:
     Temperature = 1.
@@ -132,10 +132,10 @@ def Random_Initialisation():
     return np.array([[int(2 * (random.randint(0, 1) - 0.5)) for x in range(Lattice)] for y in range(Lattice)])
 
 
-Spin_Array = Random_Initialisation()
+Spins_System = Random_Initialisation()
 
 
-def Energy_Calculation():
+def Total_Energy():
     """
     Can be called to calculate the total energy in the system
     :return: Scalar value of the total energy of the system
@@ -143,13 +143,13 @@ def Energy_Calculation():
     Energy = 0
     for x in range(Lattice):
         for y in range(Lattice):
-            Energy += -0.5 * J * Spin_Array[y, x] * (
-                    Spin_Array[y, (x + 1) % Lattice] + Spin_Array[y, (x - 1) % Lattice] + Spin_Array[
-                (y + 1) % Lattice, x] + Spin_Array[(y - 1) % Lattice, x])
+            Energy += -0.5 * J * Spins_System[y, x] * (
+                    Spins_System[y, (x + 1) % Lattice] + Spins_System[y, (x - 1) % Lattice] + Spins_System[
+                (y + 1) % Lattice, x] + Spins_System[(y - 1) % Lattice, x])
     return Energy
 
 
-Energy = Energy_Calculation()
+Energy = Total_Energy()
 
 
 def Energy_Difference(x_index, y_index):
@@ -159,16 +159,16 @@ def Energy_Difference(x_index, y_index):
     :param y_index: y position of the spin
     :return: Scalar energy difference if the spin is flipped
     """
-    Energy_Diff = 2 * J * Spin_Array[y_index, x_index] * (
-            Spin_Array[y_index, (x_index + 1) % Lattice] + Spin_Array[y_index, (x_index - 1) % Lattice] +
-            Spin_Array[(y_index + 1) % Lattice, x_index] + Spin_Array[(y_index - 1) % Lattice, x_index])
+    Energy_Diff = 2 * J * Spins_System[y_index, x_index] * (
+            Spins_System[y_index, (x_index + 1) % Lattice] + Spins_System[y_index, (x_index - 1) % Lattice] +
+            Spins_System[(y_index + 1) % Lattice, x_index] + Spins_System[(y_index - 1) % Lattice, x_index])
     return Energy_Diff
 
 
 Probabilities = [math.exp(-4 / (KB * Temperature)), math.exp(-8 / (KB * Temperature))]
 
 
-def Flip_Calculator(Delta_Energy):
+def Flip_Site(Delta_Energy):
     """
     Takes energy difference, calculates whether the spin flips with probability e^(-Delta_Energy/(kb*T))
     :param Delta_Energy: Energy difference for if it is flipped, this value can only be 4 or 8 since 2d grid and
@@ -217,32 +217,32 @@ def Correlation_Time(Auto_Corr):
     return Tau
 
 
-def Magnetic_Suscept(Magnetisation_Array):
+def Magnetic_Suscept(Total_Magnetisations):
     """
     Takes an array of total magnetisation, returns the Magnetic Susceptibility calculated from these values
-    :param Magnetisation_Array: Array that has the total magnetisation of the system at different times (in our case 8
+    :param Total_Magnetisations: Array that has the total magnetisation of the system at different times (in our case 8
     values)
     :return: Scalar value of the approximated Magnetic Susceptibility
     """
     return 1 / (KB * Temperature * LatticeSquared) * (
-            np.mean(Magnetisation_Array ** 2) - np.mean(Magnetisation_Array) ** 2)
+            np.mean(Total_Magnetisations ** 2) - np.mean(Total_Magnetisations) ** 2)
 
 
-def Specific_Heat(Energy_Array):
+def Specific_Heat(Total_Energy):
     """
     Takes an array of total energy, returns the Specific Heat calculated from these values
-    :param Energy_Array: Array that has the total energy of the system at different times (in our case 8 values)
+    :param Total_Energy: Array that has the total energy of the system at different times (in our case 8 values)
     :return: Scalar value of the approximated Specific Heat
     """
-    return 1 / (KB * LatticeSquared * Temperature ** 2) * (np.mean(Energy_Array ** 2) - np.mean(Energy_Array) ** 2)
+    return 1 / (KB * LatticeSquared * Temperature ** 2) * (np.mean(Total_Energy ** 2) - np.mean(Total_Energy) ** 2)
 
 
 def Standard_deviation(dataset, t_Max):
     """
-    Calculate the standard deviation for thermodynamics properties
-    :param dataset: array of the thermodynamics properties
+    Calculate the standard deviation for Thermodynamic properties
+    :param dataset: array of the Thermodynamic properties
     :param t_Max: total number of sweeps after equilibrium
-    :return: Standard deviation value for the thermodynamics properties
+    :return: Standard deviation value for the Thermodynamic properties
     """
     return ((2 * t_correlation / t_Max) * (np.mean(dataset ** 2) - np.mean(dataset) ** 2)) ** 0.5
 
@@ -267,32 +267,33 @@ for z in range(Amount_Initialisations):
 
         Delta_Energy = Energy_Difference(x_index, y_index)
         if Delta_Energy <= 0:
-            Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
+            Spins_System[y_index, x_index] = -Spins_System[y_index, x_index]
             Energy += Delta_Energy
-        elif Flip_Calculator(Delta_Energy):
-            Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
+        elif Flip_Site(Delta_Energy):
+            Spins_System[y_index, x_index] = -Spins_System[y_index, x_index]
             Energy += Delta_Energy
         if a % LatticeSquared == 0:
-            Spin_Magn = np.append(Spin_Magn, [np.sum(Spin_Array) / Lattice ** 2])
+            Spin_Magn = np.append(Spin_Magn, [np.sum(Spins_System) / Lattice ** 2])
 
     if Correlation_Mode:
         Multiple_Spin_Magn[z] = Spin_Magn
         if not z == 3:
-            Spin_Array = Random_Initialisation()
+            Spins_System = Random_Initialisation()
             bar = tqdm(range(Repetitions))
 
-if Thermodynamics_Mode:
+if Thermodynamic_Mode:
     Magn_PSpin = np.array([])
     Energy_PSpin = np.array([])
-    Magnet_Suscept_Array = np.array([])
-    Spec_Heat_Array = np.array([])
+    Estimated_Magnet_Suscept = np.array([])
+    Estimated_Spec_Heat = np.array([])
 
-    Energy_Array = np.array([])  # Can use Energy_PSpin too but this is easier
-    Magnetisation_Array = np.array([])
+    Total_Energy = np.array([])  # Can use Energy_PSpin too but this is easier
+    Total_Magnetisations = np.array([])
 
-    Measurement_Rate = math.ceil(2 * t_correlation * LatticeSquared)
+
     t_max = Amount_Blocks * 16 * t_correlation
     bar = tqdm(range(8 * Amount_Blocks))
+    Measurement_Rate = math.ceil(2 * t_correlation * LatticeSquared)
     for i in bar:  # Create blocks of length 16*t_corr each consisting of 8 individual measurements every 2*t_corr
         for a in range(Measurement_Rate):
             x_index = random.randint(0, Lattice - 1)
@@ -300,30 +301,30 @@ if Thermodynamics_Mode:
 
             Delta_Energy = Energy_Difference(x_index, y_index)
             if Delta_Energy <= 0:
-                Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
+                Spins_System[y_index, x_index] = -Spins_System[y_index, x_index]
                 Energy += Delta_Energy
-            elif Flip_Calculator(Delta_Energy):
-                Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
+            elif Flip_Site(Delta_Energy):
+                Spins_System[y_index, x_index] = -Spins_System[y_index, x_index]
                 Energy += Delta_Energy
-        Sum_Of_Spins = np.sum(Spin_Array)
+        Sum_Of_Spins = np.sum(Spins_System)
         Magn_PSpin = np.append(Magn_PSpin, abs(Sum_Of_Spins) / Lattice ** 2)
         Energy_PSpin = np.append(Energy_PSpin, Energy / Lattice ** 2)
-        Energy_Array = np.append(Energy_Array, Energy)
-        Magnetisation_Array = np.append(Magnetisation_Array, Sum_Of_Spins)
+        Total_Energy = np.append(Total_Energy, Energy)
+        Total_Magnetisations = np.append(Total_Magnetisations, Sum_Of_Spins)
         if (i + 1) % 8 == 0:
-            Magnet_Suscept_Array = np.append(Magnet_Suscept_Array, Magnetic_Suscept(Magnetisation_Array))
-            Spec_Heat_Array = np.append(Spec_Heat_Array, Specific_Heat(Energy_Array))
-            Energy_Array = np.array([])
-            Magnetisation_Array = np.array([])
+            Estimated_Magnet_Suscept = np.append(Estimated_Magnet_Suscept, Magnetic_Suscept(Total_Magnetisations))
+            Estimated_Spec_Heat = np.append(Estimated_Spec_Heat, Specific_Heat(Total_Energy))
+            Total_Energy = np.array([])
+            Total_Magnetisations = np.array([])
     f = open(folder1 + '\\' + 'output.txt', 'a')
     f.write('\nFor magnetization per spin, the mean is ' + str(np.mean(Magn_PSpin))
             + '\nthe standard deviation is ' + str(Standard_deviation(Magn_PSpin, t_max)))
     f.write('\nFor energy per spin, the mean is ' + str(np.mean(Energy_PSpin))
             + '\nthe standard deviation is ' + str(Standard_deviation(Energy_PSpin, t_max)))
-    f.write('\nFor magnetic susceptibility per spin, the mean is ' + str(np.mean(Magnet_Suscept_Array))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Magnet_Suscept_Array, t_max/8)))
-    f.write('\nFor specific heat per spin, the mean is ' + str(np.mean(Spec_Heat_Array))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Spec_Heat_Array, t_max/8)))
+    f.write('\nFor magnetic susceptibility per spin, the mean is ' + str(np.mean(Estimated_Magnet_Suscept))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Magnet_Suscept, t_max/8)))
+    f.write('\nFor specific heat per spin, the mean is ' + str(np.mean(Estimated_Spec_Heat))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Spec_Heat, t_max/8)))
     f.close()
 
 if Correlation_Mode:
@@ -342,12 +343,12 @@ if Correlation_Mode:
     for z in range(4):
         plt.plot(Multiple_Spin_Magn[z], Colours[z])
     plt.savefig(folder + '\\' + 'magnetization.png')
-if Thermodynamics_Mode:
+if Thermodynamic_Mode:
     plt.figure(2)
     plt.plot(Spin_Magn)
 
 plt.figure(1)
-imgplot = plt.imshow(Spin_Array)
+imgplot = plt.imshow(Spins_System)
 plt.colorbar()
 plt.savefig(folder + '\\' + 'spin_alignment.png')
 
