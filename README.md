@@ -29,6 +29,9 @@ The code requires the following(some of the functionality might work with older 
 - scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
+For our code, we contain 2 mode to analyse different quantities, correlation mode and thermodynamic mode.
+
+For the correlation mode, 
 In our repository, we provide you a bat profile `test.bat` with some arguments. You can directly run this profile on your machine to test, and it will take you around 2 minutes.
 ```
 python simulation.py --Density 0.3 --Temperature 3 --Pressure --Timestep 500 --Energy --Correlation
