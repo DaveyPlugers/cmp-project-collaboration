@@ -41,7 +41,7 @@ For the **thermodynamic mode**, It can output mean and standard deviation values
 python main.py --Temperature 1 --Data_Points 40 --Correlation_time 1.54 --Thermodynamic_Mode
 ```
 
-In `run.bat` profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
+In `run.bat` profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument. (Note that all time values parsed to the code are in units of Monte Carlo Steps per site.)
 1. --Temperature
 <br/>Set the initial temperature of system. The default value is 1.
 2. --Lattice
@@ -51,7 +51,7 @@ In `run.bat` profile, you can manually change the argument we provided to get qu
 4. --Correlation_time
 <br/>Set the system correlation time. The default value is 1.
 5. --Total_Duration
-<br/>Set the time duration the total simulation will run in correlation mode. The default value is 3000, but in system the value is `Lattice ** 2 * 3000` .
+<br/>Set the time duration the total simulation will run in correlation mode. The default value is 3000.
 6. --Data_Points
 <br/>The amount of independent blocks to calculate thermal properties. The default value is 20.
 7. --Correlation_Mode
