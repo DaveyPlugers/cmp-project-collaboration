@@ -1,12 +1,17 @@
-# CMP-project1
-## MOSA
-This is the public repository for the code MOSA (MOlecular dynamics Simulation of Argon Atoms), which can be use to analyse the following quantities of different phase of argon(which is in the 3D box of 108 argon particles with FCC lattice structure):
-- pair correlation function of system
-- pressure of system 
-- energy plot of system
-- 2D animation of syetem
+# CMP-project2
+## MOSIM
+This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of 2 dimensional Ising model:
+- Mean magnetization plot of system
+- Spin alignment plot of system
+- Correlation time of system
+
+<br/>And it can also get the following mean and standard deviation values of the thermodynamics properties:
+- Magnetization per spin
+- Energy per spin
+- Magnetic susceptibility per spin
+- Specific heat per spin
 ### Installation
-Now MOSA can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
+Now MOSIM can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
 <br/>To install, there are two ways:
 1. **Download this repository**
 <br/>You can go to our [github page](https://github.com/boson112358/cmp-project) to download it and save it on your machine
@@ -21,32 +26,42 @@ The code requires the following(some of the functionality might work with older 
 - argparse >= 1.4.0
 - matplotlib >= 3.3.4
 - numpy >= 1.20.1
-- scipy >= 0.16.0
 - tqdm >= 4.59.0
 ### Running
-In our repository, we provide you a bat profile `test.bat` with some arguments. You can directly run this profile on your machine to test, and it will take you around 2 minutes.
+For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
+
+For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
+In our repository, we provide you a bat profile `test_correlation.bat` with some arguments. You can use it to test the correlation mode. And you have to wait to get 4 simulations of the system. And for this mode, you can use following arguments: Temperature, Lattice, Total_Duration, Correlation_Mode, No_plot.
 ```
-python simulation.py --Density 0.3 --Temperature 3 --Pressure --Timestep 500 --Energy --Correlation
+python main.py --Correlation_Mode --Temperature 1 --Total_Duration 2000
 ```
+
+For the **thermodynamic mode**, It can output mean and standard deviation values of the thermodynamics properties in folder `./data`, named `output.txt`. And with a final spin alignment plot, in the folder `./plot`. In our repository, we provide you a bat profile `test_thermo.bat` with some arguments. You can use it to test the thermodynamic mode. And you first need to wait the system to reach equilibrium and then do the thermo anlysis. And for this mode, you need find the system's correlation time and equilibrium time first in order to calculate thermodynamic properties. We provide you a list for correlation time for some temperature, in `correlation.txt`. For this mode, you can use following arguments: Temperature, Lattice, Equilibrium_time, Correlation_time, Total_Duration, Data_Points, Thermodynamic_Mode, No_Plot.
+```
+python main.py --Temperature 1 --Data_Points 40 --Correlation_time 1.54 --Thermodynamic_Mode
+```
+
 In `run.bat` profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
-1. --Density
-<br/>Set the initial density of system. The default value is 1.
-2. --Temperature
+1. --Temperature
 <br/>Set the initial temperature of system. The default value is 1.
-3. --Timestep
-<br/>Set the timestep of system. The default value is 10000. Runing 10000 timesteps will cost you 35 minutes. Make sure this is a multiple of 100 if you want to calculate the Correlation.
-4. --Energy
-<br/>Can generate system energy plot in folder `./plot`, named `energy.png`.
-5. --Correlation
-<br/>Can generate system pair correlation function plot in folder `./plot`, named `pair_correlation.png`.
-6. --Pressure
-<br/>Can output the system pressure in folder `./data`, named `output.txt`.
-7. --Animation2d
-<br/>Can generate system 2d animation in folder `./plot`, named `animation.gif`
-8. --RandomInitialisation
-<br/>This is a bonus argument we made to start with a 2D system with 8 argon particles of random velocity.
+2. --Lattice
+<br/>Set the width of the grid in spin sites. The default value is 50.
+3. --Equilibrium_time
+<br/>Set the time duration until system considered in equilibrium. The default value is 1000.
+4. --Correlation_time
+<br/>Set the system correlation time. The default value is 1.
+5. --Total_Duration
+<br/>Set the time duration the total simulation will run in correlation mode. The default value is 3000, but in system the value is `Lattice ** 2 * 3000` .
+6. --Data_Points
+<br/>The amount of independent blocks to calculate thermal properties. The default value is 20.
+7. --Correlation_Mode
+<br/>Turn on the correlation mode.
+8. --Thermodynamic_Mode
+<br/>Turn on the thermodynamic mode. 
+9. --No_Plot
+<br/>Allows plots to be turned off. Otherwise, when using these two modes, you can find the corresponding plots in folder `./plot`.
 ### Relevant report
-For more detail about MOSA, you can check out our report in this repository.
+For more detail about MOSIM, you can check out our report in this repository.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
