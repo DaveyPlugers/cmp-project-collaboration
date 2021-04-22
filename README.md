@@ -1,10 +1,14 @@
 # CMP-project2
 ## MOSIM
-This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of :
-- pair correlation function of system
-- pressure of system 
-- energy plot of system
-- 2D animation of syetem
+This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of 2 dimensional Ising model:
+- Magnetization plot of system
+- Spin alignment plot of system
+- Correlation time of system
+And it can also get the following mean and standard deviation values of the thermodynamics properties:
+- Magnetization per spin
+- Energy per spin
+- Magnetic susceptibility per spin
+- Specific heat per spin
 ### Installation
 Now MOSA can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
 <br/>To install, there are two ways:
