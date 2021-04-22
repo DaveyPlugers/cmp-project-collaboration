@@ -1,3 +1,37 @@
+"""
+2D Ising Model code written by Zhen Xiang & Davey Plugers
+
+Can be called in Correlation mode with a specified temperature, lattice size, equilibration time and Total run time.
+Or it can be called in Thermodynamic mode with a specified temperature, lattice size, equilibration time, correlation time
+and the amount of requested data points.
+
+Afterwards in Correlation mode it will return a plot of the final spin alignment, 4 plots of the mean magnetisation of
+different simulations and 4 estimates of the correlation time.
+In Thermodynamics mode it will return a plot of the final spin alignment and an estimate of the mean and the standard deviation
+magnetisation per spin, energy per spin, magnetic susceptibility per spin and specific heat per spin
+_________________________________________________________
+
+Functions available:
+
+Random_Initialisation()
+
+Energy_Calculation()
+
+Energy_Difference(x_index, y_index)
+
+Flip_Calculator(Delta_Energy)
+
+Auto_Correlation(t_equilibrium, Spin_Magn)
+
+Correlation_Time(Auto_Corr)
+
+Magnetic_Suscept(Magnetisation_Array)
+
+Specific_Heat(Energy_Array)
+
+Standard_deviation(dataset, t_Max)
+"""
+
 import os
 import math
 import datetime
@@ -82,16 +116,8 @@ else:
 
 J = 1
 KB = 1
-# Temperature = 1.5
-Lattice = 50
 LatticeSquared = Lattice ** 2
-Repetitions = LatticeSquared * 5000
-# Time in units of steps per site
-t_equilibrium = 3000
-# t_correlation = 5.11
-Amount_Blocks = 50
-# Correlation_Mode = True
-# Thermodynamics_Mode = True
+
 
 f = open(folder1 + '\\' + 'output.txt', 'w')
 f.write('Initial condition: Temperature = ' + str(Temperature))
@@ -154,15 +180,6 @@ def Flip_Calculator(Delta_Energy):
     else:
         Boolean = random.random() < Probabilities[1]
     return Boolean
-
-
-def Spin_Magnetization(Spin_Magn):
-    """
-    Takes the array of Spin Magnetisations, returns a version appended with the new value of mean magn. per spin
-    :param Spin_Magn: Array of mean magn. per spin
-    :return: Same array with additionally the current mean magn. per spin
-    """
-    return np.append(Spin_Magn, [np.sum(Spin_Array) / Lattice ** 2])
 
 
 def Auto_Correlation(t_equilibrium, Spin_Magn):
@@ -230,11 +247,7 @@ def Standard_deviation(dataset, t_Max):
     return ((2 * t_correlation / t_Max) * (np.mean(dataset ** 2) - np.mean(dataset) ** 2)) ** 0.5
 
 
-# New structureplan: Have 2 different simulation possibilities:
-# 1) Run multiple simulations on the same temperature, different initials, use these to calculate equilibrium and correlation time
-# 2) Simulation where you give t_equi and t_corr, then make it run until t_equi, then start dividing in k blocks of 16t_corr
-# Every 2t_corr we calculate quantities: {m, e,X, C}, we average X and C over the next 8 measurements
-# And then use multiple blocks of these 16t_corr to do error analysis, for m and e we just do regular average with STD given
+
 
 
 if Correlation_Mode:
@@ -260,7 +273,7 @@ for z in range(Amount_Initialisations):
             Spin_Array[y_index, x_index] = -Spin_Array[y_index, x_index]
             Energy += Delta_Energy
         if a % LatticeSquared == 0:
-            Spin_Magn = Spin_Magnetization(Spin_Magn)
+            Spin_Magn = np.append(Spin_Magn, [np.sum(Spin_Array) / Lattice ** 2])
 
     if Correlation_Mode:
         Multiple_Spin_Magn[z] = Spin_Magn
@@ -302,23 +315,15 @@ if Thermodynamics_Mode:
             Spec_Heat_Array = np.append(Spec_Heat_Array, Specific_Heat(Energy_Array))
             Energy_Array = np.array([])
             Magnetisation_Array = np.array([])
-    # print(Magn_PSpin)
-    # print(Energy_PSpin)
-    # print("Magn suscept" + str(Magnet_Suscept_Array))
-    # print("Specific heat" + str(Spec_Heat_Array))
-    # print(np.mean(Magn_PSpin))
-    # print(np.mean(Energy_PSpin))
-    # print(np.mean(Magnet_Suscept_Array))
-    # print(np.mean(Spec_Heat_Array))
     f = open(folder1 + '\\' + 'output.txt', 'a')
     f.write('\nFor magnetization per spin, the mean is ' + str(np.mean(Magn_PSpin))
             + '\nthe standard deviation is ' + str(Standard_deviation(Magn_PSpin, t_max)))
     f.write('\nFor energy per spin, the mean is ' + str(np.mean(Energy_PSpin))
             + '\nthe standard deviation is ' + str(Standard_deviation(Energy_PSpin, t_max)))
     f.write('\nFor magnetic susceptibility per spin, the mean is ' + str(np.mean(Magnet_Suscept_Array))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Magnet_Suscept_Array, t_max)))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Magnet_Suscept_Array, t_max/8)))
     f.write('\nFor specific heat per spin, the mean is ' + str(np.mean(Spec_Heat_Array))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Spec_Heat_Array, t_max)))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Spec_Heat_Array, t_max/8)))
     f.close()
 
 if Correlation_Mode:
@@ -327,14 +332,11 @@ if Correlation_Mode:
         for i in range(4):
             Auto_Corr = Auto_Correlation(t_equilibrium, Multiple_Spin_Magn[i])
             Calculated_Correlation_Tau[i] = ", " + str(Correlation_Time(Auto_Corr))
-        # print(Calculated_Correlation_Tau)
         f = open(folder1 + '\\' + 'output.txt', 'a')
         for j in range(4):
             Values = ''.join(Calculated_Correlation_Tau)
         f.write('\nThe correlation times of the system are: ' + Values)
         f.close()
-        # plt.figure(3)
-        # plt.plot(Auto_Corr)
     plot2 = plt.figure(2)
     Colours = ['r', 'b', 'g', 'k']
     for z in range(4):
@@ -348,4 +350,4 @@ plt.figure(1)
 imgplot = plt.imshow(Spin_Array)
 plt.colorbar()
 plt.savefig(folder + '\\' + 'spin_alignment.png')
-# plt.show()
+
