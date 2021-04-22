@@ -32,7 +32,7 @@ Specific_Heat(Total_Energy)
 
 Standard_deviation(dataset, t_Max)
 """
-
+# import part
 import os
 import math
 import datetime
@@ -42,6 +42,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
+# create folder
 nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
 
@@ -53,22 +54,31 @@ folder1 = os.getcwd() + '\\' + nowTime + '\\' + 'data'
 if not os.path.exists(folder1):
     os.makedirs(folder1)
 
+# parser part
 parser = argparse.ArgumentParser()
 parser.add_argument('--Temperature',
                     help='Value of system temperature, default: 1',
                     nargs=1)
 
 parser.add_argument('--Lattice',
-                    help='Width of the grid in spins sites, default: 50',nargs=1)
+                    help='Width of the grid in spins sites, default: 50',
+                    nargs=1)
+
 parser.add_argument('--Equilibrium_time',
-                    help='Time duration until system is considered in equilibrium: 1000',nargs=1)
+                    help='Time duration until system is considered in equilibrium: 1000',
+                    nargs=1)
+
 parser.add_argument('--Correlation_time',
                     help='Value of system correlation time, default: 1',
                     nargs=1)
+
 parser.add_argument('--Total_Duration',
-                    help='Time duration the total simulation will run in correlation mode, default: 3000',nargs=1)
+                    help='Time duration the total simulation will run in correlation mode, default: 3000',
+                    nargs=1)
+
 parser.add_argument('--Data_Points',
-                    help='Amount of independent blocks to calculate physical quantities: 20',nargs=1)
+                    help='Amount of independent blocks to calculate physical quantities: 20',
+                    nargs=1)
 
 parser.add_argument('--Correlation_Mode',
                     help='Analysis system to get the correlation time',
@@ -82,7 +92,6 @@ parser.add_argument('--No_Plot',
                     help='Allows plots to be turned off',
                     action='store_true')
 
-
 args = parser.parse_args()
 
 Correlation_Mode = args.Correlation_Mode
@@ -94,6 +103,8 @@ if args.Temperature is None:
 else:
     Temperature = float(args.Temperature[0])
 
+print('Initial condition: Temperature = ' + str(Temperature))
+
 if args.Lattice is None:
     Lattice = 50
 else:
@@ -102,35 +113,40 @@ else:
 if args.Equilibrium_time is None:
     t_equilibrium = 1000
 else:
-    t_equilibrium = int(args.Equilibrium_time[0])
+    t_equilibrium = float(args.Equilibrium_time[0])
 
 if args.Correlation_time is None:
-    t_correlation = 1
+    t_correlation = 1.
 else:
-    t_correlation = int(args.Correlation_time[0])
+    t_correlation = float(args.Correlation_time[0])
 
 if args.Total_Duration is None:
-    Repetitions = Lattice**2 * 3000
+    Repetitions = Lattice ** 2 * 3000
 else:
-    Repetitions = Lattice**2 *int(args.Total_Duration[0])
+    Repetitions = Lattice ** 2 * int(args.Total_Duration[0])
 
 if args.Data_Points is None:
     Amount_Blocks = 20
 else:
     Amount_Blocks = int((args.Data_Points[0]))
 
+if Correlation_Mode:
+    print('Turn on correlation mode')
+
+if Thermodynamic_Mode:
+    print('Turn on thermodynamic mode')
 
 
 J = 1
 KB = 1
 LatticeSquared = Lattice ** 2
 
-
+# write output
 f = open(folder1 + '\\' + 'output.txt', 'w')
 f.write('Initial condition: Temperature = ' + str(Temperature))
 f.close()
 
-
+# function part
 def Random_Initialisation():
     """
     Can be called to return an initialisation with spin up or down randomly distributed
@@ -253,10 +269,7 @@ def Standard_deviation(dataset, t_Max):
     """
     return ((2 * t_correlation / t_Max) * (np.mean(dataset ** 2) - np.mean(dataset) ** 2)) ** 0.5
 
-
-
-
-
+# simulation part
 if Correlation_Mode:
     bar = tqdm(range(Repetitions))  # Running full simulation
     Amount_Initialisations = 4
@@ -297,7 +310,6 @@ if Thermodynamic_Mode:
     Total_Energy = np.array([])  # Can use Energy_PSpin too but this is easier
     Total_Magnetisations = np.array([])
 
-
     t_max = Amount_Blocks * 16 * t_correlation
     bar = tqdm(range(8 * Amount_Blocks))
     Measurement_Rate = math.ceil(2 * t_correlation * LatticeSquared)
@@ -329,13 +341,13 @@ if Thermodynamic_Mode:
     f.write('\nFor energy per spin, the mean is ' + str(np.mean(Energy_PSpin))
             + '\nthe standard deviation is ' + str(Standard_deviation(Energy_PSpin, t_max)))
     f.write('\nFor magnetic susceptibility per spin, the mean is ' + str(np.mean(Estimated_Magnet_Suscept))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Magnet_Suscept, t_max/8)))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Magnet_Suscept, t_max / 8)))
     f.write('\nFor specific heat per spin, the mean is ' + str(np.mean(Estimated_Spec_Heat))
-            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Spec_Heat, t_max/8)))
+            + '\nthe standard deviation is ' + str(Standard_deviation(Estimated_Spec_Heat, t_max / 8)))
     f.close()
 
 if Correlation_Mode:
-    Calculated_Correlation_Tau = [0,0,0,0]
+    Calculated_Correlation_Tau = [0, 0, 0, 0]
     if t_equilibrium < Repetitions / LatticeSquared:
         for i in range(4):
             Auto_Corr = Auto_Correlation(t_equilibrium, Multiple_Spin_Magn[i])
@@ -352,15 +364,15 @@ if Correlation_Mode:
             plt.plot(Multiple_Spin_Magn[z], Colours[z])
         plt.savefig(folder + '\\' + 'magnetization.png')
 
-
 if not No_Plot:
     if Thermodynamic_Mode:
         plt.figure(2)
         plt.plot(Spin_Magn)
+        plt.xlabel('Time [Monte Carlo Steps per Site]')
+        plt.ylabel('<m> per site')
         plt.savefig(folder + '\\' + 'magnetization.png')
 
     plt.figure(1)
     imgplot = plt.imshow(Spins_System)
     plt.colorbar()
     plt.savefig(folder + '\\' + 'spin_alignment.png')
-
