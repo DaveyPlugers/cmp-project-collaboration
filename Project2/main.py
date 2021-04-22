@@ -7,7 +7,8 @@ and the amount of requested data points.
 
 Afterwards in Correlation mode it will return a plot of the final spin alignment, 4 plots of the mean magnetisation of
 different simulations and 4 estimates of the correlation time.
-In Thermodynamic mode it will return a plot of the final spin alignment and an estimate of the mean and the standard deviation
+In Thermodynamic mode it will return a plot of the final spin alignment,
+a plot of the mean magnetisation until equilibration time and an estimate of the mean and the standard deviation
 magnetisation per spin, energy per spin, magnetic susceptibility per spin and specific heat per spin
 _________________________________________________________
 
@@ -77,10 +78,16 @@ parser.add_argument('--Thermodynamic_Mode',
                     help='Analysis system to get the Thermodynamic properties',
                     action='store_true')
 
+parser.add_argument('--No_Plot',
+                    help='Allows plots to be turned off',
+                    action='store_true')
+
+
 args = parser.parse_args()
 
 Correlation_Mode = args.Correlation_Mode
 Thermodynamic_Mode = args.Thermodynamic_Mode
+No_Plot = args.No_Plot
 
 if args.Temperature is None:
     Temperature = 1.
@@ -111,7 +118,7 @@ if args.Data_Points is None:
     Amount_Blocks = 20
 else:
     Amount_Blocks = int((args.Data_Points[0]))
-    
+
 
 
 J = 1
@@ -338,17 +345,22 @@ if Correlation_Mode:
             Values = ''.join(Calculated_Correlation_Tau)
         f.write('\nThe correlation times of the system are: ' + Values)
         f.close()
-    plot2 = plt.figure(2)
-    Colours = ['r', 'b', 'g', 'k']
-    for z in range(4):
-        plt.plot(Multiple_Spin_Magn[z], Colours[z])
-    plt.savefig(folder + '\\' + 'magnetization.png')
-if Thermodynamic_Mode:
-    plt.figure(2)
-    plt.plot(Spin_Magn)
+    if not No_Plot:
+        plot2 = plt.figure(2)
+        Colours = ['r', 'b', 'g', 'k']
+        for z in range(4):
+            plt.plot(Multiple_Spin_Magn[z], Colours[z])
+        plt.savefig(folder + '\\' + 'magnetization.png')
 
-plt.figure(1)
-imgplot = plt.imshow(Spins_System)
-plt.colorbar()
-plt.savefig(folder + '\\' + 'spin_alignment.png')
+
+if not No_Plot:
+    if Thermodynamic_Mode:
+        plt.figure(2)
+        plt.plot(Spin_Magn)
+        plt.savefig(folder + '\\' + 'magnetization.png')
+
+    plt.figure(1)
+    imgplot = plt.imshow(Spins_System)
+    plt.colorbar()
+    plt.savefig(folder + '\\' + 'spin_alignment.png')
 
