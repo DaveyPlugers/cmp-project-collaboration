@@ -11,7 +11,7 @@ This is the public repository for the code MOSIM (MOnte carlo Simulation of Isin
 - Magnetic susceptibility per spin
 - Specific heat per spin
 ### Installation
-Now MOSA can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
+Now MOSIM can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
 <br/>To install, there are two ways:
 1. **Download this repository**
 <br/>You can go to our [github page](https://github.com/boson112358/cmp-project) to download it and save it on your machine
