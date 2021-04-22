@@ -1,6 +1,6 @@
-# CMP-project1
-## MOSA
-This is the public repository for the code MOSA (MOlecular dynamics Simulation of Argon Atoms), which can be use to analyse the following quantities of different phase of argon(which is in the 3D box of 108 argon particles with FCC lattice structure):
+# CMP-project2
+## MOSIM
+This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of different phase of argon(which is in the 3D box of 108 argon particles with FCC lattice structure):
 - pair correlation function of system
 - pressure of system 
 - energy plot of system
