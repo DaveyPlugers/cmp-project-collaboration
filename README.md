@@ -30,11 +30,12 @@ The code requires the following(some of the functionality might work with older 
 ### Running
 For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
 
-For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time.
-In our repository, we provide you a bat profile `test.bat` with some arguments. You can directly run this profile on your machine to test, and it will take you around 2 minutes.
+For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
+In our repository, we provide you a bat profile `test_correlation.bat` with some arguments. You can use it test the correlation mode. And you have to wait to get 4 simulations of the system. And for this mode, you can use following arguments: Temperature, Lattice, Total_Duration, Correlation_Mode, No_plot.
 ```
-python simulation.py --Density 0.3 --Temperature 3 --Pressure --Timestep 500 --Energy --Correlation
+python main.py --Correlation_Mode --Temperature 1 --Total_Duration 2000
 ```
+
 In `run.bat` profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument.
 1. --Temperature
 <br/>Set the initial temperature of system. The default value is 1.
