@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
+Softening_Parameter = 0.04
 G = 1
 Max_R = 15
 Particle = []
@@ -212,7 +213,7 @@ def TreeGenerator():
 def ForceParticles(Vector1, Vector2):
     Distance = DistanceParticles(np.array(Vector1), np.array(Vector2[0:3]))
 
-    return Vector2[3] * G * (np.array(Vector2[0:3]) - np.array(Vector1)) / Distance ** 3
+    return Vector2[3] * G * (np.array(Vector2[0:3]) - np.array(Vector1)) / (Distance**2+Softening_Parameter**2)**1.5
 
 
 def TotalForce(Fillername, Force, Length, Part_Index, Calculations):
