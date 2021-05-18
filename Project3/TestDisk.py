@@ -1,8 +1,18 @@
 import numpy as np
 import random
+import os
+import datetime
 import matplotlib.pyplot as plt
 
-Softening_Parameter = 0.04
+# create folder
+nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
+
+if not os.path.exists(folder):
+    os.makedirs(folder)
+
+
+Softening_Parameter = 0.163
 G = 1
 Max_R = 15
 Particle = []
@@ -54,7 +64,7 @@ def make_galaxy(Number_disk, Mass_disk, shift_x, shift_y, shift_z, shift_vx, shi
     return Particleset
 
 N1 = 1000
-N2 = 1000
+N2 = 100
 M1 = 1
 M2 = 1
 disk1 = make_galaxy(N1, M1, 0, 0, 0, 0, 0, 0)
@@ -89,7 +99,7 @@ Center_Of_Mass = [0, 0, 0]
 Fillername = Boxstructure
 Looping = True
 Angle_Criterion = 0.5
-Timestep_Size = 0.02
+Timestep_Size = 0.5
 
 
 def CoMUpdater(FirstCoM, SecondCoM):
@@ -299,6 +309,7 @@ def update(q):
 
 
 ani = FuncAnimation(fig, update, frames=int(int(Steps / 10)), interval=20, init_func=init)
+ani.save(folder + '\\' + 'animation.gif', writer='pillow')
 plt.figure(2)
 plt.plot(ParticlePosHistory[:, :, 0], ParticlePosHistory[:, :, 1])
 ForceCalculations = np.array(ForceCalculations)
