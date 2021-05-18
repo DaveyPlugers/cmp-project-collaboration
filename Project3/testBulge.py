@@ -1,86 +1,125 @@
-import random
 import numpy as np
-from tqdm import tqdm
+import random
+import os
+import datetime
+import matplotlib.pyplot as plt
+
+# create folder
+nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
+
+if not os.path.exists(folder):
+    os.makedirs(folder)
+
 
 Softening_Parameter = 0.1
-N = 1000
-M = 0.333
-R = 10
-a = 0.1
 G = 1
-x = []
-y = []
-z = []
-vx = []
-vy = []
-vz = []
-rs = []
-V = []
+Max_R = 10
 Particle = []
-Add_Zero_For_Plot = False
-for i in range(N):
+def DistanceParticles(Vector1, Vector2):
+    """
+    Takes 2 position vectors and calculates distance between them
+    :param Vector1: position vector for particle one
+    :param Vector2: position vector for particle two
+    :return: distance between two particles
+    """
+    Distance = sum([x * x for x in (Vector1 - Vector2)]) ** 0.5
+    return Distance
 
-    while True:
-        m = np.random.uniform(0, M)
+def make_bulge(Number_bulge, Mass_bulge, shift_x, shift_y, shift_z, shift_vx, shift_vy, shift_vz):
+    bulge_scale_length = 0.1
+    Add_Zero_For_Plot = True
+    Minimum_Distance = 0.02
+    Particleset = []
+    for i in range(Number_bulge):
+        while True:
+            m = np.random.uniform(0, Mass_bulge)
+            r = bulge_scale_length / ((Mass_bulge / m) ** 0.5 - 1)
+            if r < Max_R:
+                break
+        Too_Close = True
+        while Too_Close:
+            Too_Close = False
+            theta = np.random.uniform(0, 2 * np.pi)
+            for j in range(len(Particle)):
 
-        r = a / ((M / m) ** 0.5 - 1)
-        # print(r)
-        if r < R:
-            break
-    rs.append(r)
-    theta = random.random()*2*np.pi
-    phi = random.random()*np.pi
+                if DistanceParticles(np.array(Particle[j][0][0:3]),
+                                     np.array([r * np.cos(theta), r * np.sin(theta), 0])) < Minimum_Distance:
+                    Too_Close = True
 
-    Position_Mass = []
-    Velocity = []
-    Position_Mass.append(r * np.sin(phi) * np.cos(theta))
-    Position_Mass.append(r * np.sin(phi) * np.sin(theta))
-    Position_Mass.append(r * np.cos(phi))
-    Position_Mass.append(M/N)
-    Vcirc = (G*m/r) ** 0.5
-    V.append(Vcirc)
-    b = random.uniform(-1,1)
-    c = random.uniform(-1, 1)
+        theta = random.random() * 2 * np.pi
+        phi = random.random() * np.pi
+        Position_Mass = []
+        Velocity = []
+        Position_Mass.append(r * np.sin(phi) * np.cos(theta) + shift_x)
+        Position_Mass.append(r * np.sin(phi) * np.sin(theta) + shift_y)
+        Position_Mass.append(r * np.cos(phi) + shift_z)
+        Position_Mass.append(Mass_bulge / Number_bulge)
+        Vcirc = (G * m / r) ** 0.5
+        tan_x = random.uniform(-1, 1)
+        tan_y = random.uniform(-1, 1)
 
-    d = - np.tan(phi)*(b*np.cos(theta) + c*np.sin(theta))
+        tan_z = - np.tan(phi) * (tan_x * np.cos(theta) + tan_y * np.sin(theta))
 
-    Norm = np.sqrt(b**2+c**2+d**2)
-    Velocity.append(Vcirc * b/Norm)
-    Velocity.append(Vcirc * c/Norm)
-    Velocity.append(Vcirc * d/Norm)
+        Norm = np.sqrt(tan_x ** 2 + tan_y ** 2 + tan_z ** 2)
+        Velocity.append(Vcirc * tan_x / Norm + shift_vx)
+        Velocity.append(Vcirc * tan_y / Norm + shift_vy)
+        Velocity.append(Vcirc * tan_z / Norm + shift_vz)
+        if Add_Zero_For_Plot:
+            Velocity.append(0)
+        Particleset.append([Position_Mass, Velocity])
+    return Particleset
 
-    if Add_Zero_For_Plot:
-        Velocity.append(0)
-    Particle.append([Position_Mass,Velocity])
+N1 = 100
+N2 = 100
+M1 = 1
+M2 = 1
+disk1 = make_bulge(N1, M1, 0, 0, 0, 0, 0, 0)
+# disk2 = make_galaxy(N2, M2, 10, 0, 0, 0, 0, 0)
+print(disk1)
+Particle = disk1
+# Particle += disk2
+PlotParticle1 = np.array(disk1)
+# PlotParticle2 = np.array(disk2)
+fig1 = plt.figure()
+plt.scatter(PlotParticle1[:, 0, 0], PlotParticle1[:, 0, 1], marker='.')
+# plt.scatter(PlotParticle2[:, 0, 0], PlotParticle2[:, 0, 1], marker='.')
+my_x_ticks = np.arange(-10, 10, 1)
+my_y_ticks = np.arange(-10, 10, 1)
+plt.xticks(my_x_ticks)
+plt.yticks(my_y_ticks)
 
-Particle.append([[0.0,0.0,0.0,0.00005],[0.0,0.0,0.0]])
-print(Particle)
+
+plt.show()
 
 import numpy as np
 from tqdm import tqdm
-G = 1
+
+G = 1  # km*(km/s)/M_Solar
 Length = 100
-Steps = 50
-Boxstructure=[[],[],[],[],[],[],[],[],[0,0,0,0]]         #[[],[]] -> [[],[[pos1],[]]]
-#Boxstructure=[[[],[[1,1,1,20],[],[1,1,1,20]],[1,1,1,20]]]
-Center_Of_Mass = [0,0,0]
-#Particle = [[[3500000000.0+150000000.0,1000000000.0,0.1,0.000003],[0.0,30,0.0]],[[3500000000.0,1000000000.0,0.1,1],[0.0,0.0,0.0]],[[3500000000.0,1000000000.0-108000000.0,0.1,0.000000002],[35,0.0,0.0]],[[3500000000.0,1000000000.0-228000000.0,0.1,0.000000002],[24,0.0,0.0]],[[3500000000.0,1000000000.0-5967265000.0,0.1,0.000000002],[-4.72,0.0,0.0]],[[3500000000.0,1000000000.0-1400000000.0,0.1,0.000000002],[-9.7,0.0,0.0]]]
+Unit_Converter_Dist = 1
+Unit_Converter_Mass = 1
+Unit_Converter_Velocity = 1
+Steps = 400
+Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]  # [[],[]] -> [[],[[pos1],[]]]
+Center_Of_Mass = [0, 0, 0]
 Fillername = Boxstructure
 Looping = True
 Angle_Criterion = 0.5
-Timestep_Size = 0.1
+Timestep_Size = 0.2
 
 
-def CoMUpdater(FirstCoM,SecondCoM):
-    UpdatedCoM = [0,0,0,0]
+def CoMUpdater(FirstCoM, SecondCoM):
+    UpdatedCoM = [0, 0, 0, 0]
     Totalmass = FirstCoM[3] + SecondCoM[3]
-    UpdatedCoM[0] = (FirstCoM[3] * FirstCoM[0] + SecondCoM[3] * SecondCoM[0])/Totalmass
-    UpdatedCoM[1] = (FirstCoM[3] * FirstCoM[1] + SecondCoM[3] * SecondCoM[1])/Totalmass
-    UpdatedCoM[2] = (FirstCoM[3] * FirstCoM[2] + SecondCoM[3] * SecondCoM[2])/Totalmass
+    UpdatedCoM[0] = (FirstCoM[3] * FirstCoM[0] + SecondCoM[3] * SecondCoM[0]) / Totalmass
+    UpdatedCoM[1] = (FirstCoM[3] * FirstCoM[1] + SecondCoM[3] * SecondCoM[1]) / Totalmass
+    UpdatedCoM[2] = (FirstCoM[3] * FirstCoM[2] + SecondCoM[3] * SecondCoM[2]) / Totalmass
     UpdatedCoM[3] = Totalmass
     return UpdatedCoM
 
-def DivisionIndex(Particle,Center_Of_Mass):
+
+def DivisionIndex(Particle, Center_Of_Mass):
     if Particle[0] < Center_Of_Mass[0]:
         if Particle[1] < Center_Of_Mass[1]:
             if Particle[2] < Center_Of_Mass[2]:
@@ -104,26 +143,36 @@ def DivisionIndex(Particle,Center_Of_Mass):
             else:
                 return 7
 
-def TemporaryCoM(DivIndex,Center_Of_Mass,Depth):
-    if DivIndex ==0:
-        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),Center_Of_Mass[2] - Length / 2 ** (Depth)]
-    elif DivIndex ==1:
-        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),Center_Of_Mass[2] - Length / 2 ** (Depth)]
-    elif DivIndex ==2:
-        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),Center_Of_Mass[2] - Length / 2 ** (Depth)]
-    elif DivIndex ==3:
-        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),Center_Of_Mass[2] - Length / 2 ** (Depth)]
-    elif DivIndex ==4:
-        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),Center_Of_Mass[2] + Length / 2 ** (Depth)]
-    elif DivIndex ==5:
-        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),Center_Of_Mass[2] + Length / 2 ** (Depth)]
-    elif DivIndex ==6:
-        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),Center_Of_Mass[2] + Length / 2 ** (Depth)]
-    elif DivIndex ==7:
-        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),Center_Of_Mass[2] + Length / 2 ** (Depth)]
 
-def DeeperArray(Div_Index,Temp_CoM,Fillername):
-    Index = DivisionIndex(Fillername[Div_Index],Temp_CoM)
+def TemporaryCoM(DivIndex, Center_Of_Mass, Depth):
+    if DivIndex == 0:
+        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),
+                Center_Of_Mass[2] - Length / 2 ** (Depth)]
+    elif DivIndex == 1:
+        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),
+                Center_Of_Mass[2] - Length / 2 ** (Depth)]
+    elif DivIndex == 2:
+        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),
+                Center_Of_Mass[2] - Length / 2 ** (Depth)]
+    elif DivIndex == 3:
+        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),
+                Center_Of_Mass[2] - Length / 2 ** (Depth)]
+    elif DivIndex == 4:
+        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),
+                Center_Of_Mass[2] + Length / 2 ** (Depth)]
+    elif DivIndex == 5:
+        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] - Length / 2 ** (Depth),
+                Center_Of_Mass[2] + Length / 2 ** (Depth)]
+    elif DivIndex == 6:
+        return [Center_Of_Mass[0] - Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),
+                Center_Of_Mass[2] + Length / 2 ** (Depth)]
+    elif DivIndex == 7:
+        return [Center_Of_Mass[0] + Length / 2 ** (Depth), Center_Of_Mass[1] + Length / 2 ** (Depth),
+                Center_Of_Mass[2] + Length / 2 ** (Depth)]
+
+
+def DeeperArray(Div_Index, Temp_CoM, Fillername):
+    Index = DivisionIndex(Fillername[Div_Index], Temp_CoM)
     Array = [[] for i in range(9)]
     Array[8] = Fillername[Div_Index]
     Array[Index] = Fillername[Div_Index]
@@ -131,109 +180,105 @@ def DeeperArray(Div_Index,Temp_CoM,Fillername):
 
 
 def Array_updater(Daughter_Array):
-    Updated_CoM = [0,0,0,0]
+    Updated_CoM = [0, 0, 0, 0]
     for i in range(8):
         if len(Daughter_Array[i]) > 0:
-            if isinstance(Daughter_Array[i][0],float):
-                Updated_CoM = CoMUpdater(Updated_CoM,Daughter_Array[i])
+            if isinstance(Daughter_Array[i][0], float):
+                Updated_CoM = CoMUpdater(Updated_CoM, Daughter_Array[i])
             else:
                 Daughter_Array[i] = Array_updater(Daughter_Array[i])
-                Updated_CoM = CoMUpdater(Updated_CoM,Daughter_Array[i][8])
+                Updated_CoM = CoMUpdater(Updated_CoM, Daughter_Array[i][8])
     Daughter_Array[8] = Updated_CoM
     return Daughter_Array
 
-def DistanceParticles(Vector1, Vector2):
-    """
-    Takes 2 position vectors and calculates distance between them
-    :param Vector1: position vector for particle one
-    :param Vector2: position vector for particle two
-    :return: distance between two particles
-    """
-    Distance = sum([x * x for x in (Vector1 - Vector2)]) ** 0.5
-    return Distance
-
-
 
 def TreeGenerator():
-    Boxstructure = [[], [], [], [],[], [], [], [], [0, 0, 0, 0]]
+    Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]
     for i in range(len(Particle)):
         Looping = True
-        Depth=0
-        Center_Of_Mass = [0,0,0]
+        Depth = 0
+        Center_Of_Mass = [0, 0, 0]
         Fillername = Boxstructure
-
+        for k in range(3):
+            if abs(Particle[i][0][k]) > Length:
+                Particle[i] = [[random.uniform(-Max_R / 2, Max_R / 2), random.uniform(-Max_R / 2, Max_R / 2),
+                                random.uniform(-Max_R / 2, Max_R / 2), 0.0000001], [0.0, 0.0, 0.0]]
         while Looping:
 
-            Div_Index = DivisionIndex(Particle[i][0],Center_Of_Mass)
+            Div_Index = DivisionIndex(Particle[i][0], Center_Of_Mass)
 
-
-            if len(Fillername[Div_Index]) > 1: #This means it is not an empty array [], here we need to update our array correspondingly
-                if isinstance(Fillername[Div_Index][0], float):  #If True, these are positions and we need to make new daughter array
-                    Temp_CoM = TemporaryCoM(Div_Index,Center_Of_Mass,Depth+1)
-                    Array = DeeperArray(Div_Index,Temp_CoM,Fillername)
+            if len(Fillername[
+                       Div_Index]) > 1:  # This means it is not an empty array [], here we need to update our array correspondingly
+                if isinstance(Fillername[Div_Index][0],
+                              float):  # If True, these are positions and we need to make new daughter array
+                    Temp_CoM = TemporaryCoM(Div_Index, Center_Of_Mass, Depth + 1)
+                    Array = DeeperArray(Div_Index, Temp_CoM, Fillername)
                     Fillername[Div_Index] = Array
-                else: #This is a daughter array so we update our CoM and Array and repeat to see where in this array our particle should go
-                    Fillername[8] = CoMUpdater(Fillername[8],Particle[i][0])
+                else:  # This is a daughter array so we update our CoM and Array and repeat to see where in this array our particle should go
+                    Fillername[8] = CoMUpdater(Fillername[8], Particle[i][0])
                     Fillername = Fillername[Div_Index]
-                    Center_Of_Mass = TemporaryCoM(Div_Index, Center_Of_Mass, Depth+1)
+                    Center_Of_Mass = TemporaryCoM(Div_Index, Center_Of_Mass, Depth + 1)
 
                     Depth += 1
-            else: #It is empty so we just insert it
-                Fillername[8] = CoMUpdater(Fillername[8],Particle[i][0])
+            else:  # It is empty so we just insert it
+                Fillername[8] = CoMUpdater(Fillername[8], Particle[i][0])
                 Fillername[Div_Index] = Particle[i][0]
                 Looping = False
     return Boxstructure
 
-def ForceParticles(Vector1,Vector2):
-    Distance = DistanceParticles(np.array(Vector1),np.array(Vector2[0:3]))
 
-    return Vector2[3]*G*(np.array(Vector2[0:3])-np.array(Vector1))/(Distance**2+Softening_Parameter**2)**1.5
+def ForceParticles(Vector1, Vector2):
+    Distance = DistanceParticles(np.array(Vector1), np.array(Vector2[0:3]))
 
-def TotalForce(Fillername,Force,Length,Part_Index,Calculations):
-    if (Length / DistanceParticles(np.array(Particle[Part_Index][0][0:3]), np.array(Fillername[8][0:3]))) < Angle_Criterion:
-        Force += ForceParticles(Particle[Part_Index][0][0:3],Fillername[8])
+    return Vector2[3] * G * (np.array(Vector2[0:3]) - np.array(Vector1)) / (Distance**2+Softening_Parameter**2)**1.5
+
+
+def TotalForce(Fillername, Force, Length, Part_Index, Calculations):
+    if (Length / DistanceParticles(np.array(Particle[Part_Index][0][0:3]),
+                                   np.array(Fillername[8][0:3]))) < Angle_Criterion:
+        Force += ForceParticles(Particle[Part_Index][0][0:3], Fillername[8])
         Calculations += 1
-        #print(t)
-        #print(Part_Index)
-        #print(Length)
-        #print(DistanceParticles(np.array(Particle[Part_Index][0][0:3]), np.array(Fillername[8][0:3])))
+        # print(t)
+        # print(Part_Index)
+        # print(Length)
+        # print(DistanceParticles(np.array(Particle[Part_Index][0][0:3]), np.array(Fillername[8][0:3])))
     else:
         for j in range(8):
-            if len(Fillername[j]) > 0: #Is empty? we skip
-                if isinstance(Fillername[j][0], float): #Is number? We cannot go deeper and do force with this
-                    if not Fillername[j] == Particle[Part_Index][0]: #Except if this was our original particle
-                        Force += ForceParticles(Particle[Part_Index][0][0:3],Fillername[j])
+            if len(Fillername[j]) > 0:  # Is empty? we skip
+                if isinstance(Fillername[j][0], float):  # Is number? We cannot go deeper and do force with this
+                    if not Fillername[j] == Particle[Part_Index][0]:  # Except if this was our original particle
+                        Force += ForceParticles(Particle[Part_Index][0][0:3], Fillername[j])
                         Calculations += 1
-                else:   #We can and must go deeper in the TreeStructure
-                    AddedForce, Calculations = TotalForce(Fillername[j],0,Length/2,Part_Index,Calculations)
+                else:  # We can and must go deeper in the TreeStructure
+                    AddedForce, Calculations = TotalForce(Fillername[j], 0, Length / 2, Part_Index, Calculations)
                     Force += AddedForce
-    return Force,Calculations
+    return Force, Calculations
 
-print("before vel update")
 
 Boxstructure = TreeGenerator()
 
-print("after vel update")
+
 def VelocityUpdate(Timestep):
     ForceCalculations = [() for i in range(len(Particle))]
     for i in range(len(Particle)):
-        Force,ForceCalculations[i]  = TotalForce(Boxstructure,0,Length,i,0)
+        Force, ForceCalculations[i] = TotalForce(Boxstructure, 0, Length, i, 0)
         for k in range(3):
-            Particle[i][1][k] += Timestep*Force[k]
+            Particle[i][1][k] += Timestep * Force[
+                k] * Unit_Converter_Dist ** 2 * Unit_Converter_Mass / Unit_Converter_Velocity ** 2
     return Particle, ForceCalculations
 
 
 def PositionUpdate(Timestep):
     for i in range(len(Particle)):
         for k in range(3):
-            Particle[i][0][k] += Timestep*Particle[i][1][k]
+            Particle[i][0][k] += Timestep * Particle[i][1][k] * Unit_Converter_Dist
     return Particle
 
 
-ParticlePosHistory = [[] for k in range(Steps+2)]
+ParticlePosHistory = [[] for k in range(Steps + 2)]
 ParticlePosHistory[0] = [Particle[k][0][0:3] for k in range(len(Particle))]
 
-Particle = VelocityUpdate(Timestep=Timestep_Size/2)[0]
+Particle = VelocityUpdate(Timestep=Timestep_Size / 2)[0]
 print("Vel update" + str(Particle))
 Particle = PositionUpdate(Timestep=Timestep_Size)
 print("pos update" + str(Particle))
@@ -244,12 +289,12 @@ ForceCalculations = [() for i in range(Steps)]
 for t in bar:
     Particle, ForceCalculations[t] = VelocityUpdate(Timestep=Timestep_Size)
     Particle = PositionUpdate(Timestep=Timestep_Size)
-    ParticlePosHistory[t+2] = [Particle[k][0][0:3] for k in range(len(Particle))]
+    ParticlePosHistory[t + 2] = [Particle[k][0][0:3] for k in range(len(Particle))]
     Boxstructure = Array_updater(Boxstructure)
 
-    if t%2 == 1:
+    if t % 1 == 0:
         Boxstructure = TreeGenerator()
-        #print(Boxstructure)
+        # print(Boxstructure)
 ParticlePosHistory = np.array(ParticlePosHistory)
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -259,20 +304,24 @@ ln1, = plt.plot([], [], 'ro')
 
 
 def init():
-    ax.set_xlim(-Length/30, Length/30)
-    ax.set_ylim(-Length/30, Length/30)
+    ax.set_xlim(-Length / 4, Length / 4)
+    ax.set_ylim(-Length / 4, Length / 4)
 
 
 print(ForceCalculations)
-def update(q):
-    ln1.set_data([ParticlePosHistory[int(5*q)][:,0]], [ParticlePosHistory[int(5*q)][:,1]])
 
-ani = FuncAnimation(fig, update, frames=int(int(Steps/5)), interval=50, init_func=init)
+
+def update(q):
+    ln1.set_data([ParticlePosHistory[int(10 * q)][:, 0]], [ParticlePosHistory[int(10 * q)][:, 1]])
+
+
+ani = FuncAnimation(fig, update, frames=int(int(Steps / 10)), interval=20, init_func=init)
+ani.save(folder + '\\' + 'animation.gif', writer='pillow')
 plt.figure(2)
-plt.plot(ParticlePosHistory[:,:,0],ParticlePosHistory[:,:,1])
+plt.plot(ParticlePosHistory[:, :, 0], ParticlePosHistory[:, :, 1])
 ForceCalculations = np.array(ForceCalculations)
 plt.figure(3)
-plt.plot(range(Steps),ForceCalculations[:,:])
+plt.plot(range(Steps), ForceCalculations[:, :])
 plt.show()
 
 
