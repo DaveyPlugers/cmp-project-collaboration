@@ -12,7 +12,6 @@ if not os.path.exists(folder):
     os.makedirs(folder)
 
 
-Softening_Parameter = 0.163
 G = 1
 Max_R = 15
 Particle = []
@@ -68,6 +67,7 @@ N2 = 100
 M1 = 1
 M2 = 1
 disk1 = make_galaxy(N1, M1, 0, 0, 0, 0, 0, 0)
+Softening_Parameter = 0.98 * N1 ** (-0.26)
 # disk2 = make_galaxy(N2, M2, 10, 0, 0, 0, 0, 0)
 print(disk1)
 Particle = disk1
@@ -93,7 +93,7 @@ Length = 100
 Unit_Converter_Dist = 1
 Unit_Converter_Mass = 1
 Unit_Converter_Velocity = 1
-Steps = 400
+Steps = 4000
 Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]  # [[],[]] -> [[],[[pos1],[]]]
 Center_Of_Mass = [0, 0, 0]
 Fillername = Boxstructure
