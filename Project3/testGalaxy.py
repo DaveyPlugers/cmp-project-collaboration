@@ -11,7 +11,8 @@ folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
 if not os.path.exists(folder):
     os.makedirs(folder)
 
-
+Energy_Rate = 10
+Energy_Tracking = True
 Softening_Parameter = 0.163
 G = 1
 Max_R = 15
@@ -310,6 +311,37 @@ def PositionUpdate(Timestep):
     return Particle
 
 
+Energy = []
+def Kin_Energy():
+    E_Kin = 0
+    for i in range(len(Particle)):
+        E_Kin += 0.5*Particle[i][0][3]*(Particle[i][1][0]**2+Particle[i][1][1]**2+Particle[i][1][2]**2)
+    return E_Kin
+def Pot_Energy():
+    E_Pot = 0
+    for i in range(len(Particle)):
+        for j in range(len(Particle)-i-1):
+            E_Pot += -G*Particle[i][0][3] * Particle[i+j+1][0][3] / DistanceParticles(np.array(Particle[i][0][0:3]),np.array(Particle[i+j+1][0][0:3]))
+    return E_Pot
+
+Separation = []
+
+def CoM_Separation(N_Galaxy1,N_Galaxy2):
+    CoM_Galaxy1 = [0.0,0.0,0.0,0.0]
+    CoM_Galaxy2 = [0.0,0.0,0.0,0.0]
+    for i in range(N_Galaxy1):
+        CoM_Galaxy1 = CoMUpdater(CoM_Galaxy1,Particle[i][0])
+    for j in range(N_Galaxy2):
+        CoM_Galaxy2 = CoMUpdater(CoM_Galaxy2,Particle[N_Galaxy1+j][0])
+
+    return DistanceParticles(np.array(CoM_Galaxy1[0:3]),np.array(CoM_Galaxy2[0:3]))
+
+#Uncomment these and fill in N_Galaxy1 and N_Galaxy2 (same on line 353 and 365
+
+#Energy.append([Kin_Energy(),Pot_Energy()])
+#Separation.append(CoM_Separation(N_Galaxy1,N_Galaxy2))
+
+
 ParticlePosHistory = [[] for k in range(Steps + 2)]
 ParticlePosHistory[0] = [Particle[k][0][0:3] for k in range(len(Particle))]
 
@@ -317,6 +349,9 @@ Particle = VelocityUpdate(Timestep=Timestep_Size / 2)[0]
 print("Vel update" + str(Particle))
 Particle = PositionUpdate(Timestep=Timestep_Size)
 print("pos update" + str(Particle))
+
+#Separation.append(CoM_Separation(N_Galaxy1,N_Galaxy2))
+
 
 ParticlePosHistory[1] = [Particle[k][0][0:3] for k in range(len(Particle))]
 bar = tqdm(range(Steps))
@@ -326,6 +361,12 @@ for t in bar:
     Particle = PositionUpdate(Timestep=Timestep_Size)
     ParticlePosHistory[t + 2] = [Particle[k][0][0:3] for k in range(len(Particle))]
     Boxstructure = Array_updater(Boxstructure)
+
+    #Separation.append(CoM_Separation(N_Galaxy1, N_Galaxy2))
+
+    if Energy_Tracking:
+        if t%Energy_Rate == Energy_Rate-1:
+            Energy.append([Kin_Energy(),Pot_Energy()])
 
     if t % 1 == 0:
         Boxstructure = TreeGenerator()
@@ -354,7 +395,29 @@ ani = FuncAnimation(fig, update, frames=int(int(Steps / 10)), interval=20, init_
 ani.save(folder + '\\' + 'animation.gif', writer='pillow')
 plt.figure(2)
 plt.plot(ParticlePosHistory[:, :, 0], ParticlePosHistory[:, :, 1])
+plt.xlabel('x position (h = 3.5kpc)')
+plt.ylabel('y position (h = 3.5kpc)')
 ForceCalculations = np.array(ForceCalculations)
 plt.figure(3)
+plt.xlabel('Time (Add right timestep here later)')
+plt.ylabel('Number of force calculations')
 plt.plot(range(Steps), ForceCalculations[:, :])
+
+
+if Energy_Tracking:
+    plt.figure(4)
+    Energy = np.array(Energy)
+    plt.plot(Energy[:, 0])
+    plt.plot(Energy[:, 1])
+    plt.plot(Energy[:, 0] + Energy[:, 1])
+    plt.legend(["E_Kin", "E_Pot", "Total Energy"])
+    plt.xlabel('Time (Add right timestep here later)')
+    plt.ylabel('Energy')
+
+
+plt.figure(5)
+plt.plot(Separation)
+plt.xlabel('Time (Add right timestep here later)')
+plt.ylabel('Separation (h=3.5kpc)')
+
 plt.show()
