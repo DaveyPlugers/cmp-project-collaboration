@@ -136,7 +136,7 @@ Length = 100
 Unit_Converter_Dist = 1
 Unit_Converter_Mass = 1
 Unit_Converter_Velocity = 1
-Steps = 400
+Steps = 200
 Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]  # [[],[]] -> [[],[[pos1],[]]]
 Center_Of_Mass = [0, 0, 0]
 Fillername = Boxstructure
@@ -338,7 +338,7 @@ def CoM_Separation(N_Galaxy1,N_Galaxy2):
 
 #Uncomment these and fill in N_Galaxy1 and N_Galaxy2 (same on line 353 and 365
 
-#Energy.append([Kin_Energy(),Pot_Energy()])
+Energy.append([Kin_Energy(),Pot_Energy()])
 #Separation.append(CoM_Separation(N_Galaxy1,N_Galaxy2))
 
 
@@ -376,7 +376,8 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 fig, ax = plt.subplots()
-ln1, = plt.plot([], [], 'ro')
+ln1, = plt.plot([], [], 'go')
+ln2, = plt.plot([], [], 'ro')
 
 
 def init():
@@ -388,7 +389,9 @@ print(ForceCalculations)
 
 
 def update(q):
-    ln1.set_data([ParticlePosHistory[int(10 * q)][:, 0]], [ParticlePosHistory[int(10 * q)][:, 1]])
+    ln1.set_data([ParticlePosHistory[int(10 * q)][0:N1d, 0]], [ParticlePosHistory[int(10 * q)][0:N1d, 1]])
+    ln2.set_data([ParticlePosHistory[int(10 * q)][N1d:N1d+N1b, 0]], [ParticlePosHistory[int(10 * q)][N1d:N1d+N1b, 1]])
+
 
 
 ani = FuncAnimation(fig, update, frames=int(int(Steps / 10)), interval=20, init_func=init)
