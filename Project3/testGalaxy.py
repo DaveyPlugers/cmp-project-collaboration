@@ -17,6 +17,8 @@ Softening_Parameter = 0.163
 G = 1
 Max_R = 15
 Particle = []
+
+
 def DistanceParticles(Vector1, Vector2):
     """
     Takes 2 position vectors and calculates distance between them
@@ -27,7 +29,9 @@ def DistanceParticles(Vector1, Vector2):
     Distance = sum([x * x for x in (Vector1 - Vector2)]) ** 0.5
     return Distance
 
-def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift_y, shift_z, shift_vx, shift_vy, shift_vz):
+
+def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift_y, shift_z, shift_vx, shift_vy,
+                shift_vz):
     Disk_potential_parameter = 1
     bulge_scale_length = 0.1
     Add_Zero_For_Plot = True
@@ -39,16 +43,8 @@ def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift
             r = ((m / Mass_disk) ** (1 / 3.)) * Disk_potential_parameter * ((1 - (m / Mass_disk) ** (2 / 3.)) ** -0.5)
             if r < Max_R:
                 break
-        Too_Close = True
-        while Too_Close:
-            Too_Close = False
-            theta = np.random.uniform(0, 2 * np.pi)
-            for j in range(len(Particle)):
 
-                if DistanceParticles(np.array(Particle[j][0][0:3]),
-                                     np.array([r * np.cos(theta), r * np.sin(theta), 0])) < Minimum_Distance:
-                    Too_Close = True
-
+        theta = np.random.uniform(0, 2 * np.pi)
         Position_Mass = []
         Velocity = []
         Position_Mass.append(r * np.cos(theta) + shift_x)
@@ -70,18 +66,9 @@ def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift
             r = bulge_scale_length / ((Mass_bulge / m) ** 0.5 - 1)
             if r < Max_R:
                 break
-        Too_Close = True
-        while Too_Close:
-            Too_Close = False
-            theta = np.random.uniform(0, 2 * np.pi)
-            for j in range(len(Particle)):
 
-                if DistanceParticles(np.array(Particle[j][0][0:3]),
-                                     np.array([r * np.cos(theta), r * np.sin(theta), 0])) < Minimum_Distance:
-                    Too_Close = True
-
-        theta = random.random() * 2 * np.pi
-        phi = random.random() * np.pi
+        theta = np.random.uniform(0, 2 * np.pi)
+        phi = np.random.uniform(0, np.pi)
         Position_Mass = []
         Velocity = []
         Position_Mass.append(r * np.sin(phi) * np.cos(theta) + shift_x)
@@ -103,28 +90,32 @@ def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift
         Particleset.append([Position_Mass, Velocity])
     return Particleset
 
-N1d = 100
-N1b = 100
-N2 = 100
+
+N1d = 3000
+N1b = 1000
+N2d = 3000
+N2b = 1000
+N_Galaxy1 = N1d + N1b
+N_Galaxy2 = N2d + N2b
 M1d = 1
 M1b = 0.333
-M2 = 1
+M2d = 1
+M2b = 0.333
 Softening_Parameter = 0.98 * (N1d + N1b) ** (-0.26)
 disk1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
-# disk2 = make_galaxy(N2, M2, 10, 0, 0, 0, 0, 0)
+disk2 = make_galaxy(N2d, M2d, N2b, M2b, 100, 0, 0, 0, 0, 0)
 print(disk1)
 Particle = disk1
-# Particle += disk2
+Particle += disk2
 PlotParticle1 = np.array(disk1)
-# PlotParticle2 = np.array(disk2)
+PlotParticle2 = np.array(disk2)
 fig1 = plt.figure()
 plt.scatter(PlotParticle1[:, 0, 0], PlotParticle1[:, 0, 1], marker='.')
-# plt.scatter(PlotParticle2[:, 0, 0], PlotParticle2[:, 0, 1], marker='.')
-my_x_ticks = np.arange(-10, 10, 1)
-my_y_ticks = np.arange(-10, 10, 1)
-plt.xticks(my_x_ticks)
-plt.yticks(my_y_ticks)
-
+plt.scatter(PlotParticle2[:, 0, 0], PlotParticle2[:, 0, 1], marker='.')
+# my_x_ticks = np.arange(-10, 10, 1)
+# my_y_ticks = np.arange(-10, 10, 1)
+# plt.xticks(my_x_ticks)
+# plt.yticks(my_y_ticks)
 
 plt.show()
 
@@ -266,7 +257,8 @@ def TreeGenerator():
 def ForceParticles(Vector1, Vector2):
     Distance = DistanceParticles(np.array(Vector1), np.array(Vector2[0:3]))
 
-    return Vector2[3] * G * (np.array(Vector2[0:3]) - np.array(Vector1)) / (Distance**2+Softening_Parameter**2)**1.5
+    return Vector2[3] * G * (np.array(Vector2[0:3]) - np.array(Vector1)) / (
+                Distance ** 2 + Softening_Parameter ** 2) ** 1.5
 
 
 def TotalForce(Fillername, Force, Length, Part_Index, Calculations):
@@ -312,46 +304,52 @@ def PositionUpdate(Timestep):
 
 
 Energy = []
+
+
 def Kin_Energy():
     E_Kin = 0
     for i in range(len(Particle)):
-        E_Kin += 0.5*Particle[i][0][3]*(Particle[i][1][0]**2+Particle[i][1][1]**2+Particle[i][1][2]**2)
+        E_Kin += 0.5 * Particle[i][0][3] * (Particle[i][1][0] ** 2 + Particle[i][1][1] ** 2 + Particle[i][1][2] ** 2)
     return E_Kin
+
+
 def Pot_Energy():
     E_Pot = 0
     for i in range(len(Particle)):
-        for j in range(len(Particle)-i-1):
-            E_Pot += -G*Particle[i][0][3] * Particle[i+j+1][0][3] / DistanceParticles(np.array(Particle[i][0][0:3]),np.array(Particle[i+j+1][0][0:3]))
+        for j in range(len(Particle) - i - 1):
+            E_Pot += -G * Particle[i][0][3] * Particle[i + j + 1][0][3] / DistanceParticles(
+                np.array(Particle[i][0][0:3]), np.array(Particle[i + j + 1][0][0:3]))
     return E_Pot
+
 
 Separation = []
 
-def CoM_Separation(N_Galaxy1,N_Galaxy2):
-    CoM_Galaxy1 = [0.0,0.0,0.0,0.0]
-    CoM_Galaxy2 = [0.0,0.0,0.0,0.0]
+
+def CoM_Separation(N_Galaxy1, N_Galaxy2):
+    CoM_Galaxy1 = [0.0, 0.0, 0.0, 0.0]
+    CoM_Galaxy2 = [0.0, 0.0, 0.0, 0.0]
     for i in range(N_Galaxy1):
-        CoM_Galaxy1 = CoMUpdater(CoM_Galaxy1,Particle[i][0])
+        CoM_Galaxy1 = CoMUpdater(CoM_Galaxy1, Particle[i][0])
     for j in range(N_Galaxy2):
-        CoM_Galaxy2 = CoMUpdater(CoM_Galaxy2,Particle[N_Galaxy1+j][0])
+        CoM_Galaxy2 = CoMUpdater(CoM_Galaxy2, Particle[N_Galaxy1 + j][0])
 
-    return DistanceParticles(np.array(CoM_Galaxy1[0:3]),np.array(CoM_Galaxy2[0:3]))
+    return DistanceParticles(np.array(CoM_Galaxy1[0:3]), np.array(CoM_Galaxy2[0:3]))
 
-#Uncomment these and fill in N_Galaxy1 and N_Galaxy2 (same on line 353 and 365
 
-Energy.append([Kin_Energy(),Pot_Energy()])
-#Separation.append(CoM_Separation(N_Galaxy1,N_Galaxy2))
+# Uncomment these and fill in N_Galaxy1 and N_Galaxy2 (same on line 353 and 365
 
+Energy.append([Kin_Energy(), Pot_Energy()])
+Separation.append(CoM_Separation(N_Galaxy1, N_Galaxy2))
 
 ParticlePosHistory = [[] for k in range(Steps + 2)]
 ParticlePosHistory[0] = [Particle[k][0][0:3] for k in range(len(Particle))]
 
 Particle = VelocityUpdate(Timestep=Timestep_Size / 2)[0]
-print("Vel update" + str(Particle))
+# print("Vel update" + str(Particle))
 Particle = PositionUpdate(Timestep=Timestep_Size)
-print("pos update" + str(Particle))
+# print("pos update" + str(Particle))
 
-#Separation.append(CoM_Separation(N_Galaxy1,N_Galaxy2))
-
+Separation.append(CoM_Separation(N_Galaxy1, N_Galaxy2))
 
 ParticlePosHistory[1] = [Particle[k][0][0:3] for k in range(len(Particle))]
 bar = tqdm(range(Steps))
@@ -362,11 +360,11 @@ for t in bar:
     ParticlePosHistory[t + 2] = [Particle[k][0][0:3] for k in range(len(Particle))]
     Boxstructure = Array_updater(Boxstructure)
 
-    #Separation.append(CoM_Separation(N_Galaxy1, N_Galaxy2))
+    Separation.append(CoM_Separation(N_Galaxy1, N_Galaxy2))
 
     if Energy_Tracking:
-        if t%Energy_Rate == Energy_Rate-1:
-            Energy.append([Kin_Energy(),Pot_Energy()])
+        if t % Energy_Rate == Energy_Rate - 1:
+            Energy.append([Kin_Energy(), Pot_Energy()])
 
     if t % 1 == 0:
         Boxstructure = TreeGenerator()
@@ -389,12 +387,12 @@ print(ForceCalculations)
 
 
 def update(q):
-    ln1.set_data([ParticlePosHistory[int(10 * q)][0:N1d, 0]], [ParticlePosHistory[int(10 * q)][0:N1d, 1]])
-    ln2.set_data([ParticlePosHistory[int(10 * q)][N1d:N1d+N1b, 0]], [ParticlePosHistory[int(10 * q)][N1d:N1d+N1b, 1]])
+    ln1.set_data([ParticlePosHistory[int(q)][0:N1d + N1b, 0]], [ParticlePosHistory[int(q)][0:N1d + N1b, 1]])
+    ln2.set_data([ParticlePosHistory[int(q)][N1d + N1b:N1d + N1b + N2d + N2b, 0]],
+                 [ParticlePosHistory[int(q)][N1d + N1b: N1d + N1b + N2d + N2b, 1]])
 
 
-
-ani = FuncAnimation(fig, update, frames=int(int(Steps / 10)), interval=20, init_func=init)
+ani = FuncAnimation(fig, update, frames=int(Steps), interval=20, init_func=init)
 ani.save(folder + '\\' + 'animation.gif', writer='pillow')
 plt.figure(2)
 plt.plot(ParticlePosHistory[:, :, 0], ParticlePosHistory[:, :, 1])
@@ -406,7 +404,6 @@ plt.xlabel('Time (Add right timestep here later)')
 plt.ylabel('Number of force calculations')
 plt.plot(range(Steps), ForceCalculations[:, :])
 
-
 if Energy_Tracking:
     plt.figure(4)
     Energy = np.array(Energy)
@@ -417,10 +414,13 @@ if Energy_Tracking:
     plt.xlabel('Time (Add right timestep here later)')
     plt.ylabel('Energy')
 
-
 plt.figure(5)
 plt.plot(Separation)
 plt.xlabel('Time (Add right timestep here later)')
 plt.ylabel('Separation (h=3.5kpc)')
+my_y_ticks = np.arange(0, 20, 2)
+plt.yticks(my_y_ticks)
+
+
 
 plt.show()
