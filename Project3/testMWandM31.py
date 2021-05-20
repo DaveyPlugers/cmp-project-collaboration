@@ -3,7 +3,7 @@ Gravitational tree code simulation written by Zhen Xiang & Davey Plugers
 
 Units => G=1 , [distance] = 3.5kpc, [mass] = 7.4*10^10 solar mass, [time] = 13.16 *10^6 years (note our timesteps are 0.76*time = 10*10^6 years)
 
-Can be called with an amount of particles N (N=bulge amount, 3N = disk amount for both galaxies), Amount of steps, Length of the simulation box, Mass multiplier
+Can be called with an amount of particles N (N=bulge amount, 3N = disk, amount for both galaxies), Amount of steps, Length of the simulation box, Mass multiplier
 and a boolean to track energy or not. This will be used to perform a gravity simulation using a tree code for O(NlogN) scaling, a damped force
 through distance R = sqrt(r²+eps²) for stability and using leap-frog for the dynamics of the particles.
 It can return multiple plots: an animation of the simulation, an initial condition of the galaxy, trajectory of the particles, separation of the two galaxies,
@@ -106,7 +106,7 @@ f.write('\nThe length of the box =' + str(Length))
 f.close()
 
 
-def make_galaxy(Number_disk, Mass_disk, Number_Bulge, Mass_Bulge, Shift_x, Shift_y, Shift_z, Shift_vx, Shift_vy,
+def Make_Galaxy(Number_disk, Mass_disk, Number_Bulge, Mass_Bulge, Shift_x, Shift_y, Shift_z, Shift_vx, Shift_vy,
                 Shift_vz):
     """
     :param Number_disk: galaxy disk particle number
@@ -485,12 +485,12 @@ M1b = 0.333 * NFold
 M2d = 1 * NFold
 M2b = 0.333 * NFold
 Softening_Parameter = 0.98 * (N_Galaxy1 + N_Galaxy2) ** (-0.26)
-galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, -55.6, 87.5, 40.5, 0.303, -0.257, -0.067)
-galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 55.6, -87.5, -40.5, 0, 0, 0)
-Particles = galaxy1
-Particles += galaxy2
-Plot_Particle1 = np.array(galaxy1)
-Plot_Particle2 = np.array(galaxy2)
+Galaxy1 = Make_Galaxy(N1d, M1d, N1b, M1b, -55.6, 87.5, 40.5, 0.303, -0.257, -0.067)
+Galaxy2 = Make_Galaxy(N2d, M2d, N2b, M2b, 55.6, -87.5, -40.5, 0, 0, 0)
+Particles = Galaxy1
+Particles += Galaxy2
+Plot_Particle1 = np.array(Galaxy1)
+Plot_Particle2 = np.array(Galaxy2)
 
 Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]  # [[],[]] -> [[],[[pos1],[]]]
 Center_Of_Box = [0, 0, 0]
@@ -549,7 +549,7 @@ def init():
     ax.set_ylim(-Length, Length)
     ax.set_xlabel('x (unit=3.5kpc)')
     ax.set_ylabel('y (unit=3.5kpc)')
-    ax.set_title('Time:' + str(Steps * 10) + 'Myr')
+    ax.set_title('Total duration:' + str(Steps * 10) + 'Myr')
     ax.legend(["MW", "M31"], loc="upper right")
 
 
