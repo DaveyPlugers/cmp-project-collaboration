@@ -29,8 +29,8 @@ The code requires the following(some of the functionality might work with older 
 - numpy >= 1.20.1
 - tqdm >= 4.59.0
 ### Running
-#### 1.Simulating one single galaxy
-First
+#### 1. Simulating one single galaxy
+First, we can use this code to generate one single galaxy contained disk and bulge. By running `testSingleGalaxy.py`, it can generate the . In our repository, we provide you a bat profile `runSingleGalaxy.bat` with some arguments. You can change the corresponding arguments to get the self-evolved single galaxy you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the 
 For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
 
 For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
