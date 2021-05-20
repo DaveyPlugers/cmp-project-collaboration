@@ -1,10 +1,12 @@
 """
 Gravitational tree code simulation written by Zhen Xiang & Davey Plugers
 
+Units => G=1 , [distance] = 3.5kpc, [mass] = 7.4*10^10 solar mass, [time] = 13.16 *10^6 years (note our timesteps are 0.76*time = 10*10^6 years)
+
 Can be called with an amount of particles N (N=bulge amount, 3N = disk amount), Amount of steps, Length of the simulation box, Mass multiplier
 and a boolean to track energy or not. This will be used to perform a gravity simulation using a tree code for O(NlogN) scaling, a damped force
 through distance R = sqrt(r²+eps²) for stability and using leap-frog for the dynamics of the particles.
-It can return multiple plots: an animation of the simulation, an initial condition of the galaxy, trajectory of the particles, separation of particle sets,
+It can return multiple plots: an animation of the simulation, an initial condition of the galaxy, trajectory of the particles,
 the amount of force calculations per particle and the energy evolution of the system.
 Note that there is no perfect energy conservation due to the tree code and force damping.
 _________________________________________________________
@@ -68,13 +70,13 @@ parser.add_argument('--Multiple_Mass',
                     help='Nfold of the mass for galaxy(original mass per galaxy is 7.4*10^10 solar mass), default: 1',
                     nargs=1)
 
-parser.add_argument('--EnergyTracking',
+parser.add_argument('--Energy_Tracking',
                     help='Analyse the systems energy',
                     action='store_true')
 
 args = parser.parse_args()
 
-Energy_Tracking = args.EnergyTracking
+Energy_Tracking = args.Energy_Tracking
 
 if args.Particle_Number is None:
     N = 100
