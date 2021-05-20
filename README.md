@@ -4,7 +4,7 @@ This is the public repository for the code of N-body simulation of galaxy merger
 - 2D animation of one self-evolved single galaxy
 - Energy plot of the system
 
-<br/>And it can also be used to simulate the **merger of two galaxies** and analyse the following properties:
+And it can also be used to simulate the **merger of two galaxies** and analyse the following properties:
 - 2D animation of two galaxies merger
 - Energy plot of the system
 - Separation plot of the center of mass
@@ -29,8 +29,8 @@ The code requires the following(some of the functionality might work with older 
 - numpy >= 1.20.1
 - tqdm >= 4.59.0
 ### Running
-#### Simulating one single galaxy
-
+#### 1.Simulating one single galaxy
+First
 For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
 
 For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
