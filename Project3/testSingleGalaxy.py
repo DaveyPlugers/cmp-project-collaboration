@@ -30,7 +30,7 @@ Pot_Energy()
 
 
 
-
+# import part
 import os
 import random
 import datetime
@@ -106,6 +106,7 @@ f.write('\nThe length of the box =' + str(Length))
 f.close()
 
 
+# function part
 def Make_Galaxy(Number_Disk, Mass_Disk, Number_Bulge, Mass_Bulge):
     """
     Used to create the initial particle set
@@ -441,7 +442,7 @@ def Pot_Energy():
 
 
 
-
+# set initial condition
 Energy_Rate = 10
 Energy_Tracking = False
 Grav_Constant = 1
@@ -468,7 +469,7 @@ Angle_Criterion = 0.5 #In this code our value has to be multiplied by 2 to corre
 Timestep_Size = 0.76
 
 
-
+# running simulation
 Boxstructure = Tree_Generator()
 Energy = []
 Energy.append([Kin_Energy(), Pot_Energy()])
@@ -499,6 +500,7 @@ for t in bar:
 
 Particle_Pos_History = np.array(Particle_Pos_History)
 
+# make plot
 fig, ax = plt.subplots()
 ln1, = plt.plot([], [], 'go')
 
