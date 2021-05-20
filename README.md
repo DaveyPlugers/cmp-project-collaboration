@@ -63,7 +63,7 @@ The following is the explaination of argument.
 5. --Energy_Tracking
 <br/>Turn on the Energy Tracking. You can get the energy plot for the simulation, but it may slower the simulation.
 6. --Mass_Ratio
-<br/>When simulating two galaxies, you can change the mass ratio of two galaxies, which it galaxy2/galaxy1. The default value is 1.
+<br/>Set the mass ratio of two galaxies. When simulating two galaxies, you can change the mass ratio of two galaxies, which it galaxy2/galaxy1. The default value is 1.
 
 ### Relevant material
 For more detail about our code, you can check out our presentaion slides in this repository.
