@@ -1,6 +1,6 @@
 # CMP-project3
 ## N-body simulation of galaxy merger
-This is the public repository for the code of N-body simulation of galaxy merger, which can be use to analyse the following quantities of 2 dimensional Ising model:
+This is the public repository for the code of N-body simulation of galaxy merger. This code can set initial positions and velocities of galaxy(contained disk and bulge) following a Kuzmin's disk potential and a Hernquist's bulge potential. The acceleration for each time step is calculated by using octree method and using leap frog algorithm to update the position and velocity for each particles. This can be use to analyse the following quantities of one single galaxy:
 - Mean magnetization plot of system
 - Spin alignment plot of system
 - Correlation time of system
