@@ -30,12 +30,21 @@ The code requires the following(some of the functionality might work with older 
 - tqdm >= 4.59.0
 ### Running
 #### 1. Simulating one single galaxy
-First, we can use this code to generate one single galaxy contained disk and bulge. By running `testSingleGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxy in xy plane and the particle's trajectory plot. In our repository, we provide you a bat profile `runSingleGalaxy.bat` with some arguments. You can change the corresponding arguments to get the self-evolved single galaxy you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
+First, we can use this code to generate one single galaxy contained disk and bulge. By running `testSingleGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxy in xy plane and the particle's trajectory plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runSingleGalaxy.bat` with some arguments. You can change the corresponding arguments to get the self-evolved single galaxy you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 
 ```
 python testSingleGalaxy.py --ParticleNumber 200 --Step 200 --MultipleMass 2
 ```
-
+#### 2. Simulating two galaxies merger
+Second, we can use this code to simulate merger of two galaxies. By running `testMergerTwoGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMergerTwoGalaxy.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, MassRatio, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
+```
+python testMergerTwoGalaxy.py --ParticleNumber 200 --Step 100 --MassRatio 2
+```
+What's more, now in our code, we only set the two galaxies with a distance of 20 units in x-axis, you can set the initial postions and velocities in the profile `testMergerTwoGalaxy.py`, to change the following two line(the last six parameters is (x,y,z,vx,vy,vz)):
+```
+galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
+galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 20, 0, 0, 0, 0, 0)
+```
 For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
 
 For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
