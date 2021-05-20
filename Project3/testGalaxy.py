@@ -2,7 +2,10 @@ import numpy as np
 import random
 import os
 import datetime
+import argparse
+from tqdm import tqdm
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 # create folder
 nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -11,12 +14,39 @@ folder = os.getcwd() + '\\' + nowTime + '\\' + 'plot'
 if not os.path.exists(folder):
     os.makedirs(folder)
 
-Energy_Rate = 10
-Energy_Tracking = True
-Softening_Parameter = 0.163
-G = 1
-Max_R = 15
-Particle = []
+folder1 = os.getcwd() + '\\' + nowTime + '\\' + 'data'
+
+if not os.path.exists(folder1):
+    os.makedirs(folder1)
+
+
+# parser part
+parser = argparse.ArgumentParser()
+parser.add_argument('--ParticleNumber',
+                    help='Value of particle number, default: 100',
+                    nargs=1)
+
+parser.add_argument('--Step',
+                    help='Value of total steps, default: 100',
+                    nargs=1)
+
+
+args = parser.parse_args()
+
+if args.ParticleNumber is None:
+    N = 100
+else:
+    N = int(args.ParticleNumber[0])
+
+if args.Step is None:
+    Steps = 100
+else:
+    Steps = int(args.Step[0])
+
+# Write a txt output profile
+f = open(folder1 + '\\' + 'output.txt', 'w')
+f.write('Initial condition: ParticleNumber = ' + str(N) + ' Steps = ' + str(Steps))
+f.close()
 
 
 def DistanceParticles(Vector1, Vector2):
@@ -29,13 +59,24 @@ def DistanceParticles(Vector1, Vector2):
     Distance = sum([x * x for x in (Vector1 - Vector2)]) ** 0.5
     return Distance
 
-
 def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift_y, shift_z, shift_vx, shift_vy,
                 shift_vz):
+    """
+    :param Number_disk: galaxy disk particle number
+    :param Mass_disk: galaxy disk mass
+    :param Number_bulge: galaxy bulge particle number
+    :param Mass_bulge: galaxy bulge mass
+    :param shift_x: shift x-axis position of galaxy from the origin
+    :param shift_y: shift y-axis position of galaxy from the origin
+    :param shift_z: shift z-axis position of galaxy from the origin
+    :param shift_vx: add extra x-axis velocity for galaxy from zero
+    :param shift_vy: add extra y-axis velocity for galaxy from zero
+    :param shift_vz: add extra z-axis velocity for galaxy from zero
+    :return: galaxy particle set
+    """
     Disk_potential_parameter = 1
     bulge_scale_length = 0.1
     Add_Zero_For_Plot = True
-    Minimum_Distance = 0.02
     Particleset = []
     for i in range(Number_disk):
         while True:
@@ -89,22 +130,24 @@ def make_galaxy(Number_disk, Mass_disk, Number_bulge, Mass_bulge, shift_x, shift
             Velocity.append(0)
         Particleset.append([Position_Mass, Velocity])
     return Particleset
-
-
-N1d = 3000
-N1b = 1000
-N2d = 3000
-N2b = 1000
+Particle = []
+Energy_Rate = 10
+Energy_Tracking = False
+G = 1  # km*(km/s)/M_Solar
+Max_R = 15
+N1d = 3*N
+N1b = N
+N2d = 3*N
+N2b = N
 N_Galaxy1 = N1d + N1b
 N_Galaxy2 = N2d + N2b
-M1d = 1
-M1b = 0.333
-M2d = 1
-M2b = 0.333
+M1d = 1 * 4
+M1b = 0.333 * 4
+M2d = 1 * 4
+M2b = 0.333 * 4
 Softening_Parameter = 0.98 * (N1d + N1b) ** (-0.26)
-disk1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
-disk2 = make_galaxy(N2d, M2d, N2b, M2b, 100, 0, 0, 0, 0, 0)
-print(disk1)
+disk1 = make_galaxy(N1d, M1d, N1b, M1b, -55.6, 87.5, 40.5, 0.303, -0.257, -0.067)
+disk2 = make_galaxy(N2d, M2d, N2b, M2b, 55.6, -87.5, -40.5, 0, 0, 0)
 Particle = disk1
 Particle += disk2
 PlotParticle1 = np.array(disk1)
@@ -117,23 +160,21 @@ plt.scatter(PlotParticle2[:, 0, 0], PlotParticle2[:, 0, 1], marker='.')
 # plt.xticks(my_x_ticks)
 # plt.yticks(my_y_ticks)
 
-plt.show()
-
-import numpy as np
-from tqdm import tqdm
-
+# plt.show()
 G = 1  # km*(km/s)/M_Solar
-Length = 100
+Length = 150
 Unit_Converter_Dist = 1
 Unit_Converter_Mass = 1
 Unit_Converter_Velocity = 1
-Steps = 200
+# Steps = 1000
 Boxstructure = [[], [], [], [], [], [], [], [], [0, 0, 0, 0]]  # [[],[]] -> [[],[[pos1],[]]]
 Center_Of_Mass = [0, 0, 0]
 Fillername = Boxstructure
 Looping = True
 Angle_Criterion = 0.5
-Timestep_Size = 0.5
+Timestep_Size = 0.76
+
+
 
 
 def CoMUpdater(FirstCoM, SecondCoM):
@@ -228,8 +269,8 @@ def TreeGenerator():
         Fillername = Boxstructure
         for k in range(3):
             if abs(Particle[i][0][k]) > Length:
-                Particle[i] = [[random.uniform(-Max_R / 2, Max_R / 2), random.uniform(-Max_R / 2, Max_R / 2),
-                                random.uniform(-Max_R / 2, Max_R / 2), 0.0000001], [0.0, 0.0, 0.0]]
+                Particle[i][0][k] = ((Particle[i][0][k] + Length) % (2 * Length) - Length)
+
         while Looping:
 
             Div_Index = DivisionIndex(Particle[i][0], Center_Of_Mass)
@@ -336,6 +377,7 @@ def CoM_Separation(N_Galaxy1, N_Galaxy2):
     return DistanceParticles(np.array(CoM_Galaxy1[0:3]), np.array(CoM_Galaxy2[0:3]))
 
 
+
 # Uncomment these and fill in N_Galaxy1 and N_Galaxy2 (same on line 353 and 365
 
 Energy.append([Kin_Energy(), Pot_Energy()])
@@ -370,8 +412,7 @@ for t in bar:
         Boxstructure = TreeGenerator()
         # print(Boxstructure)
 ParticlePosHistory = np.array(ParticlePosHistory)
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
+
 
 fig, ax = plt.subplots()
 ln1, = plt.plot([], [], 'go')
@@ -379,11 +420,14 @@ ln2, = plt.plot([], [], 'ro')
 
 
 def init():
-    ax.set_xlim(-Length / 4, Length / 4)
-    ax.set_ylim(-Length / 4, Length / 4)
+    ax.set_xlim(-Length, Length)
+    ax.set_ylim(-Length, Length)
+    ax.set_xlabel('x (unit=3.5kpc)')
+    ax.set_ylabel('y (unit=3.5kpc)')
+    ax.legend(["galaxy1", "galaxy2"], loc="upper right")
 
 
-print(ForceCalculations)
+# print(ForceCalculations)
 
 
 def update(q):
@@ -417,9 +461,10 @@ if Energy_Tracking:
 plt.figure(5)
 plt.plot(Separation)
 plt.xlabel('Time (Add right timestep here later)')
-plt.ylabel('Separation (h=3.5kpc)')
-my_y_ticks = np.arange(0, 20, 2)
-plt.yticks(my_y_ticks)
+plt.ylabel('Separation (unit=3.5kpc)')
+plt.savefig(folder + '\\' + 'separation.png')
+# my_y_ticks = np.arange(0, 20, 2)
+# plt.yticks(my_y_ticks)
 
 
 
