@@ -4,7 +4,7 @@ Gravitational tree code simulation written by Zhen Xiang & Davey Plugers
 Units => G=1 , [distance] = 3.5kpc, [mass] = 7.4*10^10 solar mass, [time] = 13.16 *10^6 years (note our timesteps are 0.76*time = 10*10^6 years)
 
 Can be called with an amount of particles N (N=bulge amount, 3N = disk, amount for second galaxy is multiplied with mass ratio to have ± same mass per particle)
-,Amount of steps, Length of the simulation box, Mass multiplier and a boolean to track energy or not.
+,Amount of steps, Length of the simulation box, Mass multiplier, Mass ratio of the galaxies and a boolean to track energy or not.
 This will be used to perform a gravity simulation using a tree code for O(NlogN) scaling, a damped force
 through distance R = sqrt(r²+eps²) for stability and using leap-frog for the dynamics of the particles.
 It can return multiple plots: an animation of the simulation, an initial condition of the galaxy, trajectory of the particles, separation of the two galaxies,
