@@ -22,7 +22,7 @@ if not os.path.exists(folder1):
 # parser part
 parser = argparse.ArgumentParser()
 parser.add_argument('--ParticleNumber',
-                    help='Value of particle number, default: 100',
+                    help='Value of particle number of bulge, default: 100',
                     nargs=1)
 
 parser.add_argument('--Step',
@@ -67,7 +67,7 @@ else:
 
 # Write a txt output profile
 f = open(folder1 + '\\' + 'output.txt', 'w')
-f.write('Initial condition: ParticleNumber = ' + str(N) + ' Steps = ' + str(Steps))
+f.write('Initial condition: ParticleNumber = ' + str(N*4) + ' Steps = ' + str(Steps))
 f.write('\nThe mass of the galaxy =' + str(NFold) + '*7.4*10^10 solar mass')
 f.write('\nThe length of the box =' + str(Length))
 f.close()
