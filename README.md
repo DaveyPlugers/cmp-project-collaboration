@@ -1,15 +1,15 @@
 # CMP-project3
 ## N-body simulation of galaxy merger
-This is the public repository for the code of N-body simulation of galaxy merger. This code can set initial positions and velocities of galaxy(contained disk and bulge) following a Kuzmin's disk potential and a Hernquist's bulge potential. The acceleration for each time step is calculated by using octree method and using leap frog algorithm to update the position and velocity for each particles. This can be use to analyse the following properties of one single galaxy:
+This is the public repository for the code of N-body simulation of galaxy merger. This code can set initial positions and velocities of galaxy(contained disk and bulge) following a Kuzmin's disk potential and a Hernquist's bulge potential. The acceleration for each time step is calculated by using octree method and using leap frog algorithm to update the position and velocity for each particles. This can be use to analyse the following properties of one **single galaxy**:
 - 2D animation of one self-evolved single galaxy
 - Energy plot of the system
 
-<br/>And it can also be used to simulate the merger of two galaxies and analyse the following properties:
+<br/>And it can also be used to simulate the **merger of two galaxies** and analyse the following properties:
 - 2D animation of two galaxies merger
 - Energy plot of the system
 - Separation plot of the center of mass
 
-<br/>We also provide you a specific case, to simulate the merger of Milky Way and Andromeda.
+<br/>We also provide you a specific case, to simulate the **merger of Milky Way and Andromeda**.
 
 ### Installation
 Now MOSIM can be worked on **Windows** system. Before installation, make sure your system meets the prerequisites listed in **Dependencies**, list below.
