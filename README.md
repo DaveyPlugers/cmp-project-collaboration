@@ -30,15 +30,15 @@ The code requires the following(some of the functionality might work with older 
 - tqdm >= 4.59.0
 ### Running
 #### 1. Simulating one single galaxy
-First, we can use this code to generate one single galaxy contained disk and bulge. By running `testSingleGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxy in xy plane and the particle's trajectory plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runSingleGalaxy.bat` with some arguments. You can change the corresponding arguments to get the self-evolved single galaxy you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
+First, we can use this code to generate one single galaxy contained disk and bulge. By running `testSingleGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxy in xy plane and the particle's trajectory plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runSingleGalaxy.bat` with some arguments. You can change the corresponding arguments to get the self-evolved single galaxy you want. For this simulation, you can use the following arguments: Particle_Number, Step, Length, Multiple_Mass, Energy_Tracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 
 ```
-python testSingleGalaxy.py --ParticleNumber 200 --Step 200 --MultipleMass 2
+python testSingleGalaxy.py --Particle_Number 200 --Step 200 --Multiple_Mass 2
 ```
 #### 2. Simulating two galaxies merger
-Second, we can use this code to simulate merger of two galaxies. By running `testMergerTwoGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMergerTwoGalaxy.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, MassRatio, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
+Second, we can use this code to simulate merger of two galaxies. By running `testMergerTwoGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMergerTwoGalaxy.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: Particle_Number, Step, Length, Multiple_Mass, Mass_Ratio, Energy_Tracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 ```
-python testMergerTwoGalaxy.py --ParticleNumber 200 --Step 100 --MassRatio 2
+python testMergerTwoGalaxy.py --Particle_Number 200 --Step 100 --Mass_Ratio 2
 ```
 What's more, now in our code, we only set the two galaxies with a distance of 20 units in x-axis, we encourage you to set the initial postions and velocities in the profile `testMergerTwoGalaxy.py`, to change the following two lines(the last six parameters is (x,y,z,vx,vy,vz)):
 ```
@@ -46,30 +46,25 @@ galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
 galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 20, 0, 0, 0, 0, 0)
 ```
 #### 3. Simulating the Milky Way and Andromeda merger
-Third, we can use this code to simulate merger of Milky Way and Andromeda. We set the initial positions and velocities for Milky Way and Andromeda merger. By running `runMWandM31.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMWandM31.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
+Third, we can use this code to simulate merger of Milky Way and Andromeda. We set the initial positions and velocities for Milky Way and Andromeda merger. By running `runMWandM31.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMWandM31.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: Particle_Number, Step, Length, Multiple_Mass, Energy_Tracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 ```
-python testMWandM31.py --ParticleNumber 200 --Step 200 --Length 200 --MultipleMass 4
+python testMWandM31.py --Particle_Number 200 --Step 200 --Length 200 --Multiple_Mass 4
 ```
 
 The following is the explaination of argument. 
-1. --Temperature
-<br/>Set the initial temperature of system. The default value is 1.
-2. --Lattice
-<br/>Set the width of the grid in spin sites. The default value is 50.
-3. --Equilibrium_time
-<br/>Set the time duration until system considered in equilibrium. The default value is 1000.
-4. --Correlation_time
-<br/>Set the system correlation time. The default value is 1.
-5. --Total_Duration
-<br/>Set the time duration the total simulation will run in correlation mode. The default value is 3000.
-6. --Data_Points
-<br/>The amount of independent blocks to calculate thermal properties. The default value is 20.
-7. --Correlation_Mode
-<br/>Turn on the correlation mode.
-8. --Thermodynamic_Mode
-<br/>Turn on the thermodynamic mode. 
-9. --No_Plot
-<br/>Allows plots to be turned off. Otherwise, when using these two modes, you can find the corresponding plots in folder `./plot`.
+1. --Particle_Number
+<br/>Set the initial bulge particle number for one single galaxy, for the disk, it's 3 times of the bulge number. The default value is 100.
+2. --Step
+<br/>Set the step for simulation, for one step, it can be scaled to 10 Myr. The default value is 100.
+3. --Length
+<br/>Set the length of the box, we encourage you to set a bigger length to avoid periodic boundary. The default value is 100.
+4. --Multiple_Mass
+<br/>Set the mass condition for galaxy. Now for every single galaxy, we set the total mass is 4/3, which can be scaled to 7.4x10^10 solar mass, you can set the Nfold mass for galaxy. The default value is 1.
+5. --Energy_Tracking
+<br/>Turn on the Energy Tracking. You can get the energy plot for the simulation, but it may slower the simulation.
+6. --Mass_Ratio
+<br/>When simulating two galaxies, you can change the mass ratio of two galaxies, which it galaxy2/galaxy1. The default value is 1.
+
 ### Relevant material
 For more detail about our code, you can check out our presentaion slides in this repository.
 ### Authors
