@@ -38,12 +38,12 @@ python testSingleGalaxy.py --Particle_Number 200 --Step 200 --Multiple_Mass 2
 #### 2. Simulating two galaxies merger
 Second, we can use this code to simulate merger of two galaxies. By running `testMergerTwoGalaxy.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMergerTwoGalaxy.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: Particle_Number, Step, Length, Multiple_Mass, Mass_Ratio, Energy_Tracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 ```
-python testMergerTwoGalaxy.py --Particle_Number 200 --Step 100 --Mass_Ratio 2
+python testMergerTwoGalaxy.py --Particle_Number 100 --Step 100 --Mass_Ratio 1.35
 ```
 What's more, now in our code, we only set the two galaxies with a distance of 20 units in x-axis, we encourage you to set the initial postions and velocities in the profile `testMergerTwoGalaxy.py`, to change the following two lines(the last six parameters is (x,y,z,vx,vy,vz)):
 ```
-galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
-galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 20, 0, 0, 0, 0, 0)
+galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, -10, 0, 0, 0, 0, 0)
+galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 10, 0, 0, 0, 0, 0)
 ```
 #### 3. Simulating the Milky Way and Andromeda merger
 Third, we can use this code to simulate merger of Milky Way and Andromeda. We set the initial positions and velocities for Milky Way and Andromeda merger. By running `runMWandM31.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMWandM31.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: Particle_Number, Step, Length, Multiple_Mass, Energy_Tracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
