@@ -28,7 +28,7 @@ Pot_Energy()
 CoM_Separation(N_Galaxy1, N_Galaxy2)
 """
 
-
+# import part
 import os
 import random
 import datetime
@@ -105,7 +105,7 @@ f.write('\nThe mass of the galaxy =' + str(NFold) + '*7.4*10^10 solar mass')
 f.write('\nThe length of the box =' + str(Length))
 f.close()
 
-
+# function part
 def Make_Galaxy(Number_disk, Mass_disk, Number_Bulge, Mass_Bulge, Shift_x, Shift_y, Shift_z, Shift_vx, Shift_vy,
                 Shift_vz):
     """
@@ -468,6 +468,7 @@ def CoM_Separation(N_Galaxy1, N_Galaxy2):
 
     return Distance_Particles(np.array(CoM_Galaxy1[0:3]), np.array(CoM_Galaxy2[0:3]))
 
+# set initial condition
 Energy = []
 Separation = []
 Energy_Rate = 10
@@ -501,7 +502,7 @@ Timestep_Size = 0.76
 Boxstructure = Tree_Generator()
 
 
-
+# start running
 if Energy_Tracking:
     Energy.append([Kin_Energy(), Pot_Energy()])
 
@@ -539,6 +540,7 @@ for t in bar:
 
 Particle_Pos_History = np.array(Particle_Pos_History)
 
+# plot part
 fig, ax = plt.subplots()
 ln1, = plt.plot([], [], 'go')
 ln2, = plt.plot([], [], 'ro')
