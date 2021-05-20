@@ -1,6 +1,6 @@
-# CMP-project2
-## MOSIM
-This is the public repository for the code MOSIM (MOnte carlo Simulation of Ising Model), which can be use to analyse the following quantities of 2 dimensional Ising model:
+# CMP-project3
+## N-body simulation of galaxy merger
+This is the public repository for the code of N-body simulation of galaxy merger, which can be use to analyse the following quantities of 2 dimensional Ising model:
 - Mean magnetization plot of system
 - Spin alignment plot of system
 - Correlation time of system
