@@ -40,25 +40,18 @@ Second, we can use this code to simulate merger of two galaxies. By running `tes
 ```
 python testMergerTwoGalaxy.py --ParticleNumber 200 --Step 100 --MassRatio 2
 ```
-What's more, now in our code, we only set the two galaxies with a distance of 20 units in x-axis, you can set the initial postions and velocities in the profile `testMergerTwoGalaxy.py`, to change the following two line(the last six parameters is (x,y,z,vx,vy,vz)):
+What's more, now in our code, we only set the two galaxies with a distance of 20 units in x-axis, we encourage you to set the initial postions and velocities in the profile `testMergerTwoGalaxy.py`, to change the following two lines(the last six parameters is (x,y,z,vx,vy,vz)):
 ```
 galaxy1 = make_galaxy(N1d, M1d, N1b, M1b, 0, 0, 0, 0, 0, 0)
 galaxy2 = make_galaxy(N2d, M2d, N2b, M2b, 20, 0, 0, 0, 0, 0)
 ```
-For our code, we contain 2 mode to analyse different quantities, **correlation mode** and **thermodynamic mode**.
-
-For the **correlation mode**, it can be used to generate a final spin alignment plot, mean magnetization plot(can be used to estimate equilibrium time), and get 4 estimates of correlation time. For the value of correlation time, it is output in the folder `./data`, named `output.txt`. And find the plot in the folder `./plot`.
-In our repository, we provide you a bat profile `test_correlation.bat` with some arguments. You can use it to test the correlation mode. And you have to wait to get 4 simulations of the system. And for this mode, you can use following arguments: Temperature, Lattice, Total_Duration, Correlation_Mode, No_plot.
+#### 3. Simulating the Milky Way and Andromeda merger
+Third, we can use this code to simulate merger of Milky Way and Andromeda. We set the initial positions and velocities for Milky Way and Andromeda merger. By running `runMWandM31.py`, it can generate the animation of given timestep, the plot of number of force calculation, the initial position distribution of galaxies in xy plane, the particle's trajectory plot and the separation distance of center of mass plot. You can find the plot in the folder `./plot`. In our repository, we provide you a bat profile `runMWandM31.bat` with some arguments. You can change the corresponding arguments to get the merger senario you want. For this simulation, you can use the following arguments: ParticleNumber, Step, Length, MultipleMass, EnergyTracking. For the initial condition quantities you set, you can find it in the folder `./data`, named `output.txt`.
 ```
-python main.py --Correlation_Mode --Temperature 1 --Total_Duration 2000
+python testMWandM31.py --ParticleNumber 200 --Step 200 --Length 200 --MultipleMass 4
 ```
 
-For the **thermodynamic mode**, It can output mean and standard deviation values of the thermodynamics properties in folder `./data`, named `output.txt`. And with a final spin alignment plot, in the folder `./plot`. In our repository, we provide you a bat profile `test_thermo.bat` with some arguments. You can use it to test the thermodynamic mode. And you first need to wait the system to reach equilibrium and then do the thermo anlysis. And for this mode, you need find the system's correlation time and equilibrium time first in order to calculate thermodynamic properties. We provide you a list for correlation time for some temperature, in `correlation.txt`. For this mode, you can use following arguments: Temperature, Lattice, Equilibrium_time, Correlation_time, Total_Duration, Data_Points, Thermodynamic_Mode, No_Plot.
-```
-python main.py --Temperature 1 --Data_Points 40 --Correlation_time 1.54 --Thermodynamic_Mode
-```
-
-In `run.bat` profile, you can manually change the argument we provided to get quantities and plot of system you want. The following is the explaination of argument. (Note that all time values parsed to the code are in units of Monte Carlo Steps per site.)
+The following is the explaination of argument. 
 1. --Temperature
 <br/>Set the initial temperature of system. The default value is 1.
 2. --Lattice
@@ -77,8 +70,8 @@ In `run.bat` profile, you can manually change the argument we provided to get qu
 <br/>Turn on the thermodynamic mode. 
 9. --No_Plot
 <br/>Allows plots to be turned off. Otherwise, when using these two modes, you can find the corresponding plots in folder `./plot`.
-### Relevant report
-For more detail about MOSIM, you can check out our report in this repository.
+### Relevant material
+For more detail about our code, you can check out our presentaion slides in this repository.
 ### Authors
 - [Davey Plugers](https://github.com/DaveyPlugers)
 - [Zhen Xiang](https://github.com/boson112358)
